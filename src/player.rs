@@ -1,4 +1,3 @@
-use arrayvec::ArrayVec;
 use cpal::{Sample, SampleFormat, StreamConfig, Stream};
 use cpal::traits::{DeviceTrait, HostTrait};
 use crossbeam_channel::{Sender, Receiver};
@@ -106,24 +105,22 @@ impl Player {
 
                     samples.iter()
                         .tuples::<(_, _)>()
-                        .flat_map(|(left, right)| {
-                            let mut vec = ArrayVec::<(f32, f32), 2>::new();
+                        .for_each(|(left, right)| {
+                            #[allow(unused_must_use)]
                             if channels == 1 {
                                 // Expand mono signal
-                                vec.push((*left, *left));
-                                vec.push((*right, *right));
+                                tx.send((*left, *left));
+                                tx.send((*right, *right));
                             } else if self.channels_out == 1 {
                                 // Stereo to mono
                                 // 2 input channels guaranteed because of previous condition
                                 let mono = (*left + *right) / 2.0f32;
-                                vec.push((mono, mono));
+                                tx.send((mono, mono));
                             } else {
                                 // 2in, 2out or 1in, 1out
-                                vec.push((*left, *right));
+                                tx.send((*left, *right));
                             }
-                            vec
-                        })
-                        .for_each(|s| tx.send(s).unwrap_or(()));
+                        });
                 }
                 Err(Error::Eof) => break,
                 Err(e) => panic!("{:?}", e),

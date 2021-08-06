@@ -12,7 +12,6 @@ crossbeam-channel = "0.5.1"
 bytes = "1.0.1"
 minimp3 = "0.5.1"
 samplerate = "0.2.4"
-arrayvec = "0.7.1"
 itertools = "0.10.1"
 
 [profile.release]

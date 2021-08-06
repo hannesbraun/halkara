@@ -1,0 +1,48 @@
+use clap::{App, Arg};
+
+use crate::player::Player;
+
+mod audius;
+mod player;
+
+fn main() {
+    let matches = App::new("Halkara")
+        .version( env!("CARGO_PKG_VERSION"))
+        .author("Hannes Braun <hannesbraun@mail.de>")
+        .about("Plays the currently trending tracks on Audius")
+        .arg(Arg::with_name("genre")
+            .short("g")
+            .long("genre")
+            .value_name("GENRE")
+            .help("Selects the trending tracks for a specified genre")
+            .takes_value(true))
+        .arg(Arg::with_name("time")
+            .short("t")
+            .long("time")
+            .value_name("TIME")
+            .help("Selects the trending tracks over a specified time range")
+            .takes_value(true))
+        .arg(Arg::with_name("v")
+            .short("v")
+            .multiple(true)
+            .help("Sets the level of verbosity"))
+        .get_matches();
+
+    let genre = matches.value_of("genre").unwrap_or("");
+    let time = matches.value_of("time").unwrap_or("");
+
+    let tracks = audius::get_trending(genre, time);
+
+    // Create player
+    let mut player = Player::new();
+    let stream = player.init();
+
+    for track in tracks {
+        println!();
+        println!("Title: {}", track.title);
+        println!("User: {}", track.user.name);
+        println!("Duration: {}", track.get_duration());
+
+        player.play(track);
+    }
+}

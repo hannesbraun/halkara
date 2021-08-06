@@ -2,7 +2,7 @@ use cpal::{Sample, SampleFormat, StreamConfig, Stream};
 use cpal::traits::{DeviceTrait, HostTrait};
 use crossbeam_channel::{Sender, Receiver};
 use itertools::Itertools;
-use minimp3::{Decoder,Error, Frame};
+use minimp3::{Decoder, Error, Frame};
 use samplerate::{Samplerate, ConverterType};
 
 use crate::audius::track;

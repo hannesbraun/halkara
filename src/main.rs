@@ -8,7 +8,7 @@ mod player;
 
 fn main() {
     let matches = App::new("Halkara")
-        .version( env!("CARGO_PKG_VERSION"))
+        .version(env!("CARGO_PKG_VERSION"))
         .author("Hannes Braun <hannesbraun@mail.de>")
         .about("Plays the currently trending tracks on Audius")
         .arg(Arg::with_name("genre")

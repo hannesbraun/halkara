@@ -39,6 +39,6 @@ impl Track {
     }
 
     pub fn get_duration(&self) -> String {
-        format!("{}:{}", self.duration / 60, self.duration % 60)
+        format!("{}:{:0>2}", self.duration / 60, self.duration % 60)
     }
 }

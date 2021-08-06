@@ -441,6 +441,7 @@ dependencies = [
  "crossbeam-channel",
  "itertools",
  "minimp3",
+ "rand",
  "reqwest",
  "samplerate",
  "serde",

@@ -1,4 +1,5 @@
 use clap::{App, Arg};
+use rand::seq::SliceRandom;
 
 use crate::player::Player;
 
@@ -22,6 +23,14 @@ fn main() {
             .value_name("TIME")
             .help("Selects the trending tracks over a specified time range")
             .takes_value(true))
+        .arg(Arg::with_name("order")
+            .short("o")
+            .long("order")
+            .value_name("ORDER")
+            .help("The order in which to play the trending tracks")
+            .possible_values(&["asc", "desc", "rand"])
+            .takes_value(true)
+            .required(false))
         .arg(Arg::with_name("v")
             .short("v")
             .multiple(true)
@@ -30,8 +39,20 @@ fn main() {
 
     let genre = matches.value_of("genre").unwrap_or("");
     let time = matches.value_of("time").unwrap_or("");
+    let order = matches.value_of("order").unwrap_or("asc");
 
-    let tracks = audius::get_trending(genre, time);
+    let mut tracks = audius::get_trending(genre, time);
+
+    // Reorder tracks
+    match order {
+        "desc" => {
+            tracks.reverse();
+        }
+        "rand" => {
+            tracks.shuffle(&mut rand::thread_rng());
+        }
+        _ => {}
+    }
 
     // Create player
     let mut player = Player::new();

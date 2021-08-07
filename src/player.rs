@@ -1,4 +1,4 @@
-use cpal::{Sample, SampleFormat, StreamConfig, Stream};
+use cpal::{Sample, SampleFormat, StreamConfig, Stream, SampleRate};
 use cpal::traits::{DeviceTrait, HostTrait};
 use crossbeam_channel::{Sender, Receiver};
 use itertools::Itertools;
@@ -32,9 +32,19 @@ impl Player {
         let device = host.default_output_device().expect("No output device available");
         let mut supported_configs_range = device.supported_output_configs()
             .expect("error while querying configs");
-        let supported_config = supported_configs_range.next()
-            .expect("no supported config?!")
-            .with_max_sample_rate();
+        let supported_config_range = supported_configs_range.next()
+            .expect("no supported config?!");
+        let min_sample_rate = supported_config_range.min_sample_rate().0;
+        let max_sample_rate = supported_config_range.max_sample_rate().0;
+        let supported_config;
+        if 48000 > min_sample_rate && 48000 < max_sample_rate {
+            supported_config = supported_config_range.with_sample_rate(SampleRate(48000));
+        } else if min_sample_rate > 44100 {
+            supported_config = supported_config_range.with_sample_rate(SampleRate(min_sample_rate));
+        } else {
+            supported_config = supported_config_range.with_max_sample_rate();
+        }
+
         let sample_format = supported_config.sample_format();
         let config: StreamConfig = supported_config.into();
         self.channels_out = config.channels;

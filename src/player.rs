@@ -4,6 +4,7 @@ use crossbeam_channel::{Sender, Receiver};
 use itertools::Itertools;
 use minimp3::{Decoder, Error, Frame};
 use samplerate::{Samplerate, ConverterType};
+use std::{thread, time};
 
 use crate::audius::track;
 
@@ -136,5 +137,10 @@ impl Player {
                 Err(e) => panic!("{:?}", e),
             }
         }
+    }
+
+    pub fn drain(&self) {
+        // TODO this is super ugly... but it should work
+        thread::sleep(time::Duration::from_millis(1000));
     }
 }

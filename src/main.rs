@@ -69,4 +69,6 @@ fn main() {
 
         player.play(track.track);
     }
+
+    player.drain();
 }

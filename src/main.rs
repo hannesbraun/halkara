@@ -62,10 +62,11 @@ fn main() {
 
     for track in tracks {
         println!();
-        println!("Title: {}", track.title);
-        println!("User: {}", track.user.name);
-        println!("Duration: {}", track.get_duration());
+        println!("==================== #{:0>3} ====================", track.rank);
+        println!("Title: {}", track.track.title);
+        println!("User: {}", track.track.user.name);
+        println!("Duration: {}", track.track.get_duration());
 
-        player.play(track);
+        player.play(track.track);
     }
 }

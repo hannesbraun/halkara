@@ -14,6 +14,11 @@ struct TrendingResponse {
     data: Vec<Track>,
 }
 
+pub struct TrendingTrack {
+    pub track: Track,
+    pub rank: u8,
+}
+
 const APP_NAME: &str = "Halkara";
 
 fn get_api() -> String {
@@ -21,7 +26,7 @@ fn get_api() -> String {
     return String::from(api_res.data.first().unwrap()) + "/v1/";
 }
 
-pub fn get_trending(genre: &str, time: &str) -> Vec<Track> {
+pub fn get_trending(genre: &str, time: &str) -> Vec<TrendingTrack> {
     // Select API endpoint
     let api = get_api();
 
@@ -31,5 +36,16 @@ pub fn get_trending(genre: &str, time: &str) -> Vec<Track> {
     let trending_url = api + "tracks/trending?app_name=" + APP_NAME + &genre_param + &time_param;
     let trending_res = reqwest::blocking::get(trending_url).unwrap().json::<TrendingResponse>().unwrap();
 
-    return trending_res.data;
+    // Enrich with the track's rank
+    let mut trending_tracks = Vec::new();
+    let mut rank = 1u8;
+    for track in trending_res.data {
+        trending_tracks.push(TrendingTrack {
+            track,
+            rank,
+        });
+        rank += 1;
+    }
+
+    return trending_tracks;
 }

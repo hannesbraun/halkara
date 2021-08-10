@@ -7,26 +7,14 @@ use super::{APP_NAME, get_api};
 #[derive(Deserialize)]
 pub struct Track {
     id: String,
-    repost_count: u32,
-    favorite_count: u32,
     pub title: String,
     pub user: User,
     duration: u32,
-    play_count: u32,
 }
 
 #[derive(Deserialize)]
 pub struct User {
-    album_count: u32,
-    followee_count: u32,
-    follower_count: u32,
-    handle: String,
-    id: String,
-    is_verified: bool,
     pub name: String,
-    playlist_count: u32,
-    repost_count: u32,
-    track_count: u32,
 }
 
 impl Track {

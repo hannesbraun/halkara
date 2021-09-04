@@ -6,10 +6,10 @@ edition = "2018"
 [dependencies]
 clap = "2.33.3"
 reqwest = { version = "0.11.4", features = ["blocking", "json"] }
-serde = { version = "1.0.127", features = ["derive"] }
-cpal = "0.13.3"
+serde = { version = "1.0.130", features = ["derive"] }
+cpal = "0.13.4"
 crossbeam-channel = "0.5.1"
-bytes = "1.0.1"
+bytes = "1.1.0"
 minimp3 = "0.5.1"
 samplerate = "0.2.4"
 itertools = "0.10.1"

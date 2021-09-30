@@ -62,7 +62,7 @@ fn main() {
 
     for track in tracks {
         println!();
-        println!("==================== #{:0>3} ====================", track.rank);
+        println!("===================================== #{:0>3} =====================================", track.rank);
         println!("Title: {}", track.track.title);
         println!("User: {}", track.track.user.name);
         println!("Duration: {}", track.track.get_duration());

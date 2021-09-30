@@ -18,7 +18,7 @@ pub struct User {
 }
 
 impl Track {
-    pub fn get_stream(self) -> Reader<Bytes> {
+    pub fn get_stream(&self) -> Reader<Bytes> {
         let api = get_api();
 
         // Get stream

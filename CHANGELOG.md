@@ -1,5 +1,10 @@
 # Changelog
 
+0.1.2
+------
+* Switched to an 80 character "heading" on the console
+* Internal: the selected API endpoint will now be cached for an hour
+
 0.1.1
 ------
 * Added an ugly workaround to not cut off the end

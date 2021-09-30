@@ -1,6 +1,6 @@
 [package]
 name = "halkara"
-version = "0.1.2-SNAPSHOT"
+version = "0.1.2"
 edition = "2018"
 
 [dependencies]

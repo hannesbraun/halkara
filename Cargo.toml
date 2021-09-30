@@ -1,6 +1,6 @@
 [package]
 name = "halkara"
-version = "0.1.1"
+version = "0.1.2-SNAPSHOT"
 edition = "2018"
 
 [dependencies]
@@ -14,6 +14,7 @@ minimp3 = "0.5.1"
 samplerate = "0.2.4"
 itertools = "0.10.1"
 rand = "0.8.4"
+lazy_static = "1.4.0"
 
 [profile.release]
 lto = "fat"

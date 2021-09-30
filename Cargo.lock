@@ -427,13 +427,14 @@ dependencies = [
 
 [[package]]
 name = "halkara"
-version = "0.1.1"
+version = "0.1.2-SNAPSHOT"
 dependencies = [
  "bytes",
  "clap",
  "cpal",
  "crossbeam-channel",
  "itertools",
+ "lazy_static",
  "minimp3",
  "rand",
  "reqwest",

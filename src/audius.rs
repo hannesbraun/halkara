@@ -1,3 +1,7 @@
+use std::sync::RwLock;
+use std::time::Instant;
+
+use lazy_static::lazy_static;
 use serde::Deserialize;
 
 use track::Track;
@@ -19,11 +23,45 @@ pub struct TrendingTrack {
     pub rank: u8,
 }
 
+struct ApiCache {
+    url: String,
+    timestamp: Option<Instant>,
+}
+
+lazy_static! {
+    static ref API_CACHE: RwLock<ApiCache> = RwLock::new(ApiCache {
+        url: String::new(),
+        timestamp: None,
+    });
+}
+
 const APP_NAME: &str = "Halkara";
 
+
 fn get_api() -> String {
-    let api_res = reqwest::blocking::get("https://api.audius.co").unwrap().json::<ApiResponse>().unwrap();
-    return String::from(api_res.data.first().unwrap()) + "/v1/";
+    let mut update_cache = true;
+    let mut url = String::new();
+    if let Ok(cache) = API_CACHE.read() {
+        if let Some(timestamp) = cache.timestamp {
+            if Instant::now().duration_since(timestamp).as_secs() < 3600 {
+                update_cache = false;
+                url = cache.url.clone();
+            }
+        }
+    }
+
+    if update_cache {
+        let api_res = reqwest::blocking::get("https://api.audius.co").unwrap().json::<ApiResponse>().unwrap();
+        url = String::from(api_res.data.first().unwrap()) + "/v1/";
+
+        if let Ok(mut cache) = API_CACHE.write() {
+            // Cache for next call
+            cache.url = url.clone();
+            cache.timestamp = Some(Instant::now());
+        }
+    }
+
+    return url;
 }
 
 pub fn get_trending(genre: &str, time: &str) -> Vec<TrendingTrack> {

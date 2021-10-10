@@ -1,5 +1,9 @@
 # Changelog
 
+0.1.3
+------
+* Improved playback sample rate selection
+
 0.1.2
 ------
 * Switched to an 80 character "heading" on the console

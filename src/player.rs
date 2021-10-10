@@ -42,11 +42,13 @@ impl Player {
         let min_sample_rate = supported_config_range.min_sample_rate().0;
         let max_sample_rate = supported_config_range.max_sample_rate().0;
         let supported_config;
-        if 48000 > min_sample_rate && 48000 < max_sample_rate {
+        if 48000 >= min_sample_rate && 48000 <= max_sample_rate {
+            // 48 kHz is the preferred sample rate since Audius serves files with this sample rate
             supported_config = supported_config_range.with_sample_rate(SampleRate(48000));
-        } else if min_sample_rate > 44100 {
+        } else if min_sample_rate >= 44100 {
             supported_config = supported_config_range.with_sample_rate(SampleRate(min_sample_rate));
         } else {
+            // Sample rate is somewhere below 48 kHz
             supported_config = supported_config_range.with_max_sample_rate();
         }
 

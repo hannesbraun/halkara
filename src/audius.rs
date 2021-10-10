@@ -63,7 +63,7 @@ fn get_api() -> String {
         }
     }
 
-    return url;
+    url
 }
 
 pub fn get_trending(genre: &str, time: &str) -> Vec<TrendingTrack> {
@@ -95,5 +95,5 @@ pub fn get_trending(genre: &str, time: &str) -> Vec<TrendingTrack> {
         rank += 1;
     }
 
-    return trending_tracks;
+    trending_tracks
 }

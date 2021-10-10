@@ -61,7 +61,8 @@ impl Player {
         };
 
         let channels_out = self.channels_out;
-        let stream = match sample_format {
+
+        match sample_format {
             SampleFormat::I16 => device
                 .build_output_stream::<i16, _, _>(
                     &config,
@@ -83,9 +84,7 @@ impl Player {
                     ecb,
                 )
                 .unwrap(),
-        };
-
-        stream
+        }
     }
 
     fn cb<T: Sample>(data: &mut [T], rx: &Receiver<(f32, f32)>, channels_out: u16) {

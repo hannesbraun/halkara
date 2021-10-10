@@ -1,8 +1,8 @@
-use bytes::{Buf, Bytes};
 use bytes::buf::Reader;
+use bytes::{Buf, Bytes};
 use serde::Deserialize;
 
-use super::{APP_NAME, get_api};
+use super::{get_api, APP_NAME};
 
 #[derive(Deserialize)]
 pub struct Track {
@@ -23,7 +23,11 @@ impl Track {
 
         // Get stream
         let stream_url = api + "tracks/" + &self.id + "/stream?app_name=" + APP_NAME;
-        reqwest::blocking::get(stream_url).unwrap().bytes().unwrap().reader()
+        reqwest::blocking::get(stream_url)
+            .unwrap()
+            .bytes()
+            .unwrap()
+            .reader()
     }
 
     pub fn get_duration(&self) -> String {

@@ -1,9 +1,9 @@
-use cpal::{Sample, SampleFormat, StreamConfig, Stream, SampleRate};
 use cpal::traits::{DeviceTrait, HostTrait};
-use crossbeam_channel::{Sender, Receiver};
+use cpal::{Sample, SampleFormat, SampleRate, Stream, StreamConfig};
+use crossbeam_channel::{Receiver, Sender};
 use itertools::Itertools;
 use minimp3::{Decoder, Error, Frame};
-use samplerate::{Samplerate, ConverterType};
+use samplerate::{ConverterType, Samplerate};
 use std::{thread, time};
 
 use crate::audius::track;
@@ -30,10 +30,14 @@ impl Player {
         self.tx = Some(tx);
 
         let host = cpal::default_host();
-        let device = host.default_output_device().expect("No output device available");
-        let mut supported_configs_range = device.supported_output_configs()
+        let device = host
+            .default_output_device()
+            .expect("No output device available");
+        let mut supported_configs_range = device
+            .supported_output_configs()
             .expect("error while querying configs");
-        let supported_config_range = supported_configs_range.next()
+        let supported_config_range = supported_configs_range
+            .next()
             .expect("no supported config?!");
         let min_sample_rate = supported_config_range.min_sample_rate().0;
         let max_sample_rate = supported_config_range.max_sample_rate().0;
@@ -58,9 +62,27 @@ impl Player {
 
         let channels_out = self.channels_out;
         let stream = match sample_format {
-            SampleFormat::I16 => device.build_output_stream::<i16, _, _>(&config, move |data, _| { Player::cb::<i16>(data, &rx, channels_out) }, ecb).unwrap(),
-            SampleFormat::U16 => device.build_output_stream::<u16, _, _>(&config, move |data, _| { Player::cb::<u16>(data, &rx, channels_out) }, ecb).unwrap(),
-            SampleFormat::F32 => device.build_output_stream::<f32, _, _>(&config, move |data, _| { Player::cb::<f32>(data, &rx, channels_out) }, ecb).unwrap()
+            SampleFormat::I16 => device
+                .build_output_stream::<i16, _, _>(
+                    &config,
+                    move |data, _| Player::cb::<i16>(data, &rx, channels_out),
+                    ecb,
+                )
+                .unwrap(),
+            SampleFormat::U16 => device
+                .build_output_stream::<u16, _, _>(
+                    &config,
+                    move |data, _| Player::cb::<u16>(data, &rx, channels_out),
+                    ecb,
+                )
+                .unwrap(),
+            SampleFormat::F32 => device
+                .build_output_stream::<f32, _, _>(
+                    &config,
+                    move |data, _| Player::cb::<f32>(data, &rx, channels_out),
+                    ecb,
+                )
+                .unwrap(),
         };
 
         stream
@@ -90,13 +112,31 @@ impl Player {
         let stream = track.get_stream();
         let mut decoder = Decoder::new(stream);
 
-        let mut sample_rate_converter_mono = Samplerate::new(ConverterType::SincBestQuality, 48000, self.sample_rate_out, 1).unwrap();
-        let mut sample_rate_converter_stereo = Samplerate::new(ConverterType::SincBestQuality, 48000, self.sample_rate_out, 2).unwrap();
+        let mut sample_rate_converter_mono = Samplerate::new(
+            ConverterType::SincBestQuality,
+            48000,
+            self.sample_rate_out,
+            1,
+        )
+        .unwrap();
+        let mut sample_rate_converter_stereo = Samplerate::new(
+            ConverterType::SincBestQuality,
+            48000,
+            self.sample_rate_out,
+            2,
+        )
+        .unwrap();
 
         loop {
             match decoder.next_frame() {
-                Ok(Frame { data, sample_rate, channels, .. }) => {
-                    let mut samples: Vec<f32> = data.iter()
+                Ok(Frame {
+                    data,
+                    sample_rate,
+                    channels,
+                    ..
+                }) => {
+                    let mut samples: Vec<f32> = data
+                        .iter()
                         .enumerate()
                         .filter(|(i, _)| i % channels < 2) // Filter out channels other than left/right (0 or 1)
                         .map(|(_, s)| *s as f32 / 32768f32)
@@ -106,32 +146,32 @@ impl Player {
                     if sample_rate as u32 != self.sample_rate_out {
                         let sample_rate_converter = match channels {
                             1 => &mut sample_rate_converter_mono,
-                            _ => &mut sample_rate_converter_stereo
+                            _ => &mut sample_rate_converter_stereo,
                         };
                         if sample_rate_converter.from_rate() != sample_rate as u32 {
                             sample_rate_converter.set_from_rate(sample_rate as u32);
                         }
-                        samples = sample_rate_converter.process(&samples).unwrap_or_else(|_| vec![]);
+                        samples = sample_rate_converter
+                            .process(&samples)
+                            .unwrap_or_else(|_| vec![]);
                     }
 
-                    samples.iter()
-                        .tuples::<(_, _)>()
-                        .for_each(|(left, right)| {
-                            #[allow(unused_must_use)]
-                            if channels == 1 {
-                                // Expand mono signal
-                                tx.send((*left, *left));
-                                tx.send((*right, *right));
-                            } else if self.channels_out == 1 {
-                                // Stereo to mono
-                                // 2 input channels guaranteed because of previous condition
-                                let mono = (*left + *right) / 2.0f32;
-                                tx.send((mono, mono));
-                            } else {
-                                // 2in, 2out or 1in, 1out
-                                tx.send((*left, *right));
-                            }
-                        });
+                    samples.iter().tuples::<(_, _)>().for_each(|(left, right)| {
+                        #[allow(unused_must_use)]
+                        if channels == 1 {
+                            // Expand mono signal
+                            tx.send((*left, *left));
+                            tx.send((*right, *right));
+                        } else if self.channels_out == 1 {
+                            // Stereo to mono
+                            // 2 input channels guaranteed because of previous condition
+                            let mono = (*left + *right) / 2.0f32;
+                            tx.send((mono, mono));
+                        } else {
+                            // 2in, 2out or 1in, 1out
+                            tx.send((*left, *right));
+                        }
+                    });
                 }
                 Err(Error::Eof) => break,
                 Err(e) => panic!("{:?}", e),

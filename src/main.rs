@@ -65,8 +65,7 @@ fn main() {
     }
 
     // Create player
-    let mut player = Player::new();
-    let _stream = player.init();
+    let player = Player::new();
 
     for track in tracks {
         println!();
@@ -80,6 +79,4 @@ fn main() {
 
         player.play(track.track);
     }
-
-    player.drain();
 }

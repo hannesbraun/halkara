@@ -1,8 +1,7 @@
-use bytes::buf::Reader;
-use bytes::{Buf, Bytes};
+use bytes::Bytes;
 use serde::Deserialize;
 
-use super::{get_api, APP_NAME};
+use super::{APP_NAME, get_api};
 
 #[derive(Deserialize)]
 pub struct Track {
@@ -18,7 +17,7 @@ pub struct User {
 }
 
 impl Track {
-    pub fn get_stream(&self) -> Reader<Bytes> {
+    pub fn get_stream(&self) -> Bytes {
         let api = get_api();
 
         // Get stream
@@ -27,7 +26,6 @@ impl Track {
             .unwrap()
             .bytes()
             .unwrap()
-            .reader()
     }
 
     pub fn get_duration(&self) -> String {

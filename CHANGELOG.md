@@ -1,5 +1,9 @@
 # Changelog
 
+0.1.4
+------
+* Lower CPU usage through more efficient audio player backend
+
 0.1.3
 ------
 * Improved playback sample rate selection

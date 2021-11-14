@@ -83,9 +83,9 @@ pub fn get_trending(genre: &str, time: &str) -> Vec<TrendingTrack> {
     };
     let trending_url = api + "tracks/trending?app_name=" + APP_NAME + &genre_param + &time_param;
     let trending_res = reqwest::blocking::get(trending_url)
-        .unwrap()
+        .expect("Unable to execute GET request for list of trending tracks")
         .json::<TrendingResponse>()
-        .unwrap();
+        .expect("Unable to deserialize the list of trending tracks");
 
     // Enrich with the track's rank
     let mut trending_tracks = Vec::new();

@@ -1,5 +1,10 @@
 # Changelog
 
+0.1.5
+------
+* Improved error messages for retrieving trending tracks
+* Halkara doesn't crash anymore if a track is blacklisted.
+
 0.1.4
 ------
 * Lower CPU usage through more efficient audio player backend

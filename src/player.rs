@@ -18,7 +18,7 @@ impl Player {
 
         Player {
             _stream,
-            _stream_handle : stream_handle,
+            _stream_handle: stream_handle,
             sink,
         }
     }

@@ -12,7 +12,7 @@ fn main() {
         .author("Hannes Braun <hannesbraun@mail.de>")
         .about("Plays the currently trending tracks on Audius")
         .arg(
-            Arg::with_name("genre")
+            Arg::new("genre")
                 .short('g')
                 .long("genre")
                 .value_name("GENRE")
@@ -21,7 +21,7 @@ fn main() {
                 .required(false),
         )
         .arg(
-            Arg::with_name("time")
+            Arg::new("time")
                 .short('t')
                 .long("time")
                 .value_name("TIME")
@@ -30,7 +30,7 @@ fn main() {
                 .required(false),
         )
         .arg(
-            Arg::with_name("order")
+            Arg::new("order")
                 .short('o')
                 .long("order")
                 .value_name("ORDER")
@@ -40,13 +40,13 @@ fn main() {
                 .required(false),
         )
         .arg(
-            Arg::with_name("v")
+            Arg::new("v")
                 .short('v')
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Sets the level of verbosity"),
         )
         .arg(
-            Arg::with_name("volume")
+            Arg::new("volume")
                 .long("volume")
                 .value_name("VOLUME")
                 .help("The volume in dBFS")

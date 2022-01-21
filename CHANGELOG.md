@@ -1,5 +1,10 @@
 # Changelog
 
+0.2.0
+------
+* New volume argument (unit is dBFS): `--volume -6.0`
+* Internal: updated dependencies
+
 0.1.5
 ------
 * Improved error messages for retrieving trending tracks

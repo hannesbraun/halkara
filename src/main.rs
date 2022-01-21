@@ -45,11 +45,21 @@ fn main() {
                 .multiple(true)
                 .help("Sets the level of verbosity"),
         )
+        .arg(
+            Arg::with_name("volume")
+                .long("volume")
+                .value_name("VOLUME")
+                .help("The volume in dBFS")
+                .takes_value(true)
+                .required(false)
+                .allow_hyphen_values(true)
+        )
         .get_matches();
 
     let genre = matches.value_of("genre").unwrap_or("");
     let time = matches.value_of("time").unwrap_or("");
     let order = matches.value_of("order").unwrap_or("asc");
+    let volume = matches.value_of("volume").unwrap_or("0.0").parse::<f32>().unwrap_or(0.0);
 
     let mut tracks = audius::get_trending(genre, time);
 
@@ -65,7 +75,7 @@ fn main() {
     }
 
     // Create player
-    let player = Player::new();
+    let player = Player::new(volume);
 
     for track in tracks {
         println!();

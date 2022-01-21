@@ -12,9 +12,13 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new() -> Player {
+    pub fn new(volume: f32) -> Player {
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
+        if volume != 0.0 {
+            let lin = 10.0f32.powf(volume/10.0f32);
+            sink.set_volume(lin);
+        }
 
         Player {
             _stream,

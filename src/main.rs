@@ -13,7 +13,7 @@ fn main() {
         .about("Plays the currently trending tracks on Audius")
         .arg(
             Arg::with_name("genre")
-                .short("g")
+                .short('g')
                 .long("genre")
                 .value_name("GENRE")
                 .help("Selects the trending tracks for a specified genre")
@@ -22,7 +22,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("time")
-                .short("t")
+                .short('t')
                 .long("time")
                 .value_name("TIME")
                 .help("Selects the trending tracks over a specified time range")
@@ -31,7 +31,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("order")
-                .short("o")
+                .short('o')
                 .long("order")
                 .value_name("ORDER")
                 .help("The order in which to play the trending tracks")
@@ -41,7 +41,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("v")
-                .short("v")
+                .short('v')
                 .multiple(true)
                 .help("Sets the level of verbosity"),
         )

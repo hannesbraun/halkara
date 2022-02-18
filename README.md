@@ -6,16 +6,17 @@ Halkara is a simple command line utility to play the tracks that are currently t
 
 ```
 USAGE:
-    halkara [FLAGS] [OPTIONS]
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+    halkara [OPTIONS]
 
 OPTIONS:
-    -g, --genre <GENRE>    Selects the trending tracks for a specified genre
-    -o, --order <ORDER>    The order in which to play the trending tracks [possible values: asc, desc, rand]
-    -t, --time <TIME>      Selects the trending tracks over a specified time range
+    -g, --genre <GENRE>      Selects the trending tracks for a specified genre
+    -h, --help               Print help information
+    -o, --order <ORDER>      The order in which to play the trending tracks [possible values: asc,
+                             desc, rand]
+    -t, --time <TIME>        Selects the trending tracks over a specified time range
+    -v                       Sets the level of verbosity
+    -V, --version            Print version information
+        --volume <VOLUME>    The volume in dBFS
 ```
 
 ### Example

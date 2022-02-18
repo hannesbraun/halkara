@@ -1,7 +1,7 @@
 use bytes::Bytes;
 use serde::Deserialize;
 
-use super::{get_api, APP_NAME};
+use super::{APP_NAME, get_api};
 
 #[derive(Deserialize)]
 pub struct Track {
@@ -17,12 +17,15 @@ pub struct User {
 }
 
 impl Track {
-    pub fn get_stream(&self) -> Bytes {
+    pub fn get_stream(&self) -> Option<Bytes> {
         let api = get_api();
 
         // Get stream
         let stream_url = api + "tracks/" + &self.id + "/stream?app_name=" + APP_NAME;
-        reqwest::blocking::get(stream_url).unwrap().bytes().unwrap()
+        reqwest::blocking::get(stream_url).unwrap().bytes().map_or_else(|err| {
+            eprintln!("Error: {}", err.to_string());
+            None
+        }, |bytes| Some(bytes))
     }
 
     pub fn get_duration(&self) -> String {

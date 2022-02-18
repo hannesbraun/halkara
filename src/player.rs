@@ -16,7 +16,7 @@ impl Player {
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
         if volume != 0.0 {
-            let lin = 10.0f32.powf(volume/10.0f32);
+            let lin = 10.0f32.powf(volume / 10.0f32);
             sink.set_volume(lin);
         }
 
@@ -28,13 +28,15 @@ impl Player {
     }
 
     pub fn play(&self, track: track::Track) {
-        let stream = track.get_stream();
+        let stream = match track.get_stream() {
+            Some(stream) => stream,
+            None => return,
+        };
         let error_msg = if stream.len() < 16384 {
             str::from_utf8(&stream).unwrap_or("Error: invalid stream format")
         } else {
             "Error: invalid stream format"
-        }
-        .to_string();
+        }.to_string();
 
         let cursor = Cursor::new(stream);
         let decoder = Decoder::new(cursor);

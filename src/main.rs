@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 use rand::seq::SliceRandom;
 
 use crate::player::Player;
@@ -7,7 +7,7 @@ mod audius;
 mod player;
 
 fn main() {
-    let matches = App::new("Halkara")
+    let matches = Command::new("halkara")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Hannes Braun <hannesbraun@mail.de>")
         .about("Plays the currently trending tracks on Audius")

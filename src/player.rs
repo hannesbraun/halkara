@@ -36,7 +36,8 @@ impl Player {
             str::from_utf8(&stream).unwrap_or("Error: invalid stream format")
         } else {
             "Error: invalid stream format"
-        }.to_string();
+        }
+        .to_string();
 
         let cursor = Cursor::new(stream);
         let decoder = Decoder::new(cursor);

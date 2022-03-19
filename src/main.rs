@@ -1,5 +1,6 @@
 use clap::{Arg, Command};
 use rand::seq::SliceRandom;
+use terminal_size::{terminal_size, Width};
 
 use crate::player::Player;
 
@@ -83,14 +84,34 @@ fn main() {
 
     for track in tracks {
         println!();
-        println!(
-            "===================================== #{:0>3} =====================================",
-            track.rank
-        );
+        print_rank(track.rank);
         println!("Title: {}", track.track.title);
         println!("User: {}", track.track.user.name);
         println!("Duration: {}", track.track.get_duration());
 
         player.play(track.track);
     }
+}
+
+fn print_rank(rank: u8) {
+    let term_size = terminal_size();
+    let width = if let Some((Width(w), _)) = term_size {
+        w
+    } else {
+        80
+    };
+
+    let line_char = "=";
+    let rank_width = 6;
+    let half_width = (width - rank_width) / 2;
+    let half_line = std::iter::repeat(line_char)
+        .take(half_width as usize)
+        .collect::<String>();
+    let filler = if half_width * 2 + rank_width != width {
+        line_char
+    } else {
+        ""
+    };
+
+    println!("{} #{:0>3} {}{}", half_line, rank, half_line, filler);
 }

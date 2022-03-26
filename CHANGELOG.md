@@ -1,5 +1,11 @@
 # Changelog
 
+0.2.1
+------
+* The rank line width is now dependent on the terminal width
+* Halkara doesn't crash anymore on timeouts when loading a track
+* Internal: updated dependencies
+
 0.2.0
 ------
 * New volume argument (unit is dBFS): `--volume -6.0`

@@ -127,9 +127,7 @@ fn print_rank(rank: u8) {
     let line_char = "=";
     let rank_width = 6;
     let half_width = (width - rank_width) / 2;
-    let half_line = std::iter::repeat(line_char)
-        .take(std::cmp::max(half_width, 0) as usize)
-        .collect::<String>();
+    let half_line = line_char.repeat(std::cmp::max(half_width, 0) as usize);
     let filler = if half_width * 2 + rank_width != width {
         line_char
     } else {

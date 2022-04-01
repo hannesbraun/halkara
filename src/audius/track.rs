@@ -27,10 +27,10 @@ impl Track {
             .bytes()
             .map_or_else(
                 |err| {
-                    eprintln!("Error: {}", err.to_string());
+                    eprintln!("Error: {}", err);
                     None
                 },
-                |bytes| Some(bytes),
+                Some,
             )
     }
 

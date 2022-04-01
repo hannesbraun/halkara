@@ -1,5 +1,6 @@
-use clap::{Arg, Command};
 use rand::seq::SliceRandom;
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 use terminal_size::{terminal_size, Width};
 
 use crate::player::Player;
@@ -7,73 +8,95 @@ use crate::player::Player;
 mod audius;
 mod player;
 
+enum PlayOrder {
+    Ascending,
+    Descending,
+    Random,
+}
+
+impl PlayOrder {
+    fn from_string(str: &str) -> Result<PlayOrder, ParseEnumError> {
+        match str {
+            "asc" => Ok(PlayOrder::Ascending),
+            "desc" => Ok(PlayOrder::Descending),
+            "rand" => Ok(PlayOrder::Random),
+            _ => Err(ParseEnumError {
+                details: str.to_owned() + " is not a valid order",
+            }),
+        }
+    }
+}
+
+#[derive(Debug)]
+struct ParseEnumError {
+    details: String,
+}
+
+impl Display for ParseEnumError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.details)
+    }
+}
+
+impl Error for ParseEnumError {
+    fn description(&self) -> &str {
+        &self.details
+    }
+}
+
+fn print_help() {
+    println!(
+        "USAGE:
+    halkara [OPTIONS]
+
+OPTIONS:
+    -g, --genre <GENRE>      Selects the trending tracks for a specified genre
+    -h, --help               Print help information
+    -o, --order <ORDER>      The order in which to play the trending tracks [possible values: asc,
+                             desc, rand]
+    -t, --time <TIME>        Selects the trending tracks over a specified time range
+    -V, --version            Print version information
+        --volume <VOLUME>    The volume in dBFS"
+    );
+}
+
 fn main() {
-    let matches = Command::new("halkara")
-        .version(env!("CARGO_PKG_VERSION"))
-        .author("Hannes Braun <hannesbraun@mail.de>")
-        .about("Plays the currently trending tracks on Audius")
-        .arg(
-            Arg::new("genre")
-                .short('g')
-                .long("genre")
-                .value_name("GENRE")
-                .help("Selects the trending tracks for a specified genre")
-                .takes_value(true)
-                .required(false),
-        )
-        .arg(
-            Arg::new("time")
-                .short('t')
-                .long("time")
-                .value_name("TIME")
-                .help("Selects the trending tracks over a specified time range")
-                .takes_value(true)
-                .required(false),
-        )
-        .arg(
-            Arg::new("order")
-                .short('o')
-                .long("order")
-                .value_name("ORDER")
-                .help("The order in which to play the trending tracks")
-                .possible_values(&["asc", "desc", "rand"])
-                .takes_value(true)
-                .required(false),
-        )
-        .arg(
-            Arg::new("v")
-                .short('v')
-                .multiple_occurrences(true)
-                .help("Sets the level of verbosity"),
-        )
-        .arg(
-            Arg::new("volume")
-                .long("volume")
-                .value_name("VOLUME")
-                .help("The volume in dBFS")
-                .takes_value(true)
-                .required(false)
-                .allow_hyphen_values(true),
-        )
-        .get_matches();
+    let mut args = pico_args::Arguments::from_env();
+    let genre: Option<String> = args
+        .opt_value_from_str(["-g", "--genre"])
+        .expect("parsing genre");
+    let help = args.contains(["-h", "--help"]);
+    let order: PlayOrder = args
+        .opt_value_from_fn(["-o", "--order"], PlayOrder::from_string)
+        .expect("parsing order")
+        .unwrap_or(PlayOrder::Ascending);
+    let time: Option<String> = args
+        .opt_value_from_str(["-t", "--time"])
+        .expect("parsing time");
+    let version = args.contains(["-V", "--version"]);
+    let volume: f32 = args
+        .opt_value_from_str("--volume")
+        .expect("parsing volume")
+        .unwrap_or_default();
 
-    let genre = matches.value_of("genre").unwrap_or("");
-    let time = matches.value_of("time").unwrap_or("");
-    let order = matches.value_of("order").unwrap_or("asc");
-    let volume = matches
-        .value_of("volume")
-        .unwrap_or("0.0")
-        .parse::<f32>()
-        .unwrap_or(0.0);
+    if help {
+        print_help();
+        return;
+    }
 
-    let mut tracks = audius::get_trending(genre, time);
+    if version {
+        println!("halkara {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
+
+    let mut tracks = audius::get_trending(&genre.unwrap_or_default(), &time.unwrap_or_default());
 
     // Reorder tracks
     match order {
-        "desc" => {
+        PlayOrder::Descending => {
             tracks.reverse();
         }
-        "rand" => {
+        PlayOrder::Random => {
             tracks.shuffle(&mut rand::thread_rng());
         }
         _ => {}

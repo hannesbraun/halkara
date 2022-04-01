@@ -14,7 +14,6 @@ OPTIONS:
     -o, --order <ORDER>      The order in which to play the trending tracks [possible values: asc,
                              desc, rand]
     -t, --time <TIME>        Selects the trending tracks over a specified time range
-    -v                       Sets the level of verbosity
     -V, --version            Print version information
         --volume <VOLUME>    The volume in dBFS
 ```

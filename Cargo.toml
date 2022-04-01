@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 bytes = "1.1.0"
-clap = "3.1.6"
 lazy_static = "1.4.0"
+pico-args = "0.4.2"
 rand = "0.8.5"
 reqwest = { version = "0.11.9", features = ["blocking", "json"] }
 rodio = "0.15.0"

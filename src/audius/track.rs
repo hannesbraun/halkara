@@ -8,7 +8,7 @@ pub struct Track {
     id: String,
     pub title: String,
     pub user: User,
-    duration: u32,
+    pub duration: u32,
 }
 
 #[derive(Deserialize)]

@@ -100,8 +100,11 @@ impl PicoParsable<Duration> for Duration {
     }
 }
 
+// Log is only read when the ncurses feature is turned on
+#[allow(dead_code)]
 pub struct ConsoleArgs {
     pub(crate) genre: Option<String>,
+    pub(crate) log: bool,
     pub(crate) max_length: Option<Duration>,
     pub(crate) min_length: Option<Duration>,
     pub(crate) order: PlayOrder,
@@ -115,6 +118,7 @@ pub fn handle_args() -> Option<ConsoleArgs> {
         .opt_value_from_str(["-g", "--genre"])
         .expect("parsing genre");
     let help = args.contains(["-h", "--help"]);
+    let log = args.contains("--log");
     let max_length: Option<Duration> = args
         .opt_value_from_fn("--max-length", Duration::pico_parse)
         .expect("parsing max-length");
@@ -146,6 +150,7 @@ pub fn handle_args() -> Option<ConsoleArgs> {
 
     Some(ConsoleArgs {
         genre,
+        log,
         min_length,
         max_length,
         order,
@@ -162,6 +167,7 @@ fn print_help() {
 OPTIONS:
     -g, --genre <GENRE>      Selects the trending tracks for a specified genre
     -h, --help               Print help information
+        --log                Switches to the log user interface
         --max-length         The maximum length for a track (longer tracks won't be played)
         --min-length         The minimum length for a track (shorter tracks won't be played)
     -o, --order <ORDER>      The order in which to play the trending tracks [possible values: asc,

@@ -1,13 +1,14 @@
 use std::time::Duration;
 
 use rand::seq::SliceRandom;
-use terminal_size::{terminal_size, Width};
 
 use crate::player::Player;
+use crate::ui::HalkaraUi;
 
 mod args;
 mod audius;
 mod player;
+mod ui;
 mod utils;
 
 enum PlayOrder {
@@ -21,7 +22,7 @@ fn main() {
 
     let mut tracks = audius::get_trending(
         &console_args.genre.unwrap_or_default(),
-        &console_args.time.unwrap_or_default(),
+        console_args.time.clone().unwrap_or_default().as_str(),
     );
 
     // Filter tracks
@@ -55,34 +56,36 @@ fn main() {
     // Create player
     let player = Player::new(console_args.volume);
 
-    for track in tracks {
-        println!();
-        print_rank(track.rank);
-        println!("Title: {}", track.track.title);
-        println!("User: {}", track.track.user.name);
-        println!("Duration: {}", track.track.get_duration());
+    let mut hui: Box<dyn HalkaraUi>;
+    #[cfg(feature = "ncurses")]
+    {
+        if console_args.log {
+            hui = Box::new(ui::log::Log::new());
+        } else {
+            let header_line = match console_args
+                .time
+                .unwrap_or_else(|| "week".to_string())
+                .to_lowercase()
+                .as_str()
+            {
+                "week" => String::from("Trending tracks of this week"),
+                "month" => String::from("Trending tracks of this month"),
+                "alltime" => String::from("Trending tracks of all time"),
+                &_ => String::from("Trending tracks of... I don't know?!"),
+            };
 
+            hui = Box::new(ui::ncurses::Ncurses::new(header_line));
+        }
+    }
+    #[cfg(not(feature = "ncurses"))]
+    {
+        hui = Box::new(ui::log::Log::new());
+    }
+
+    hui.setup();
+    for track in tracks {
+        hui.display(&track);
         player.play(track.track);
     }
-}
-
-fn print_rank(rank: u8) {
-    let term_size = terminal_size();
-    let width = if let Some((Width(w), _)) = term_size {
-        w
-    } else {
-        80
-    };
-
-    let line_char = "=";
-    let rank_width = 6;
-    let half_width = (width - rank_width) / 2;
-    let half_line = line_char.repeat(std::cmp::max(half_width, 0) as usize);
-    let filler = if half_width * 2 + rank_width != width {
-        line_char
-    } else {
-        ""
-    };
-
-    println!("{} #{:0>3} {}{}", half_line, rank, half_line, filler);
+    hui.cleanup();
 }

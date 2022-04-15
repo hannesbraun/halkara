@@ -27,10 +27,10 @@ impl Player {
         }
     }
 
-    pub fn play(&self, track: track::Track) {
+    pub fn play(&self, track: &track::Track) -> Result<(), String> {
         let stream = match track.get_stream() {
-            Some(stream) => stream,
-            None => return,
+            Ok(stream) => stream,
+            Err(e) => return Err(e.to_string()),
         };
         let error_msg = if stream.len() < 16384 {
             str::from_utf8(&stream).unwrap_or("Error: invalid stream format")
@@ -45,8 +45,9 @@ impl Player {
             Ok(decoder) => {
                 self.sink.append(decoder);
                 self.sink.sleep_until_end();
+                Ok(())
             }
-            Err(_) => eprintln!("{}", error_msg),
+            Err(_) => Err(error_msg),
         }
     }
 }

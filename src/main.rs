@@ -20,35 +20,32 @@ enum PlayOrder {
 fn main() {
     let console_args = unwrap_or_return!(args::handle_args());
 
-    let mut tracks = audius::get_trending(
+    let mut track_groups = vec![audius::get_trending(
         &console_args.genre.unwrap_or_default(),
         console_args.time.clone().unwrap_or_default().as_str(),
-    );
+    )];
 
     // Filter tracks
-    tracks = tracks
-        .into_iter()
-        .filter(|t| {
-            Duration::from_secs(t.track.duration as u64)
-                <= console_args
-                    .max_length
-                    .unwrap_or(Duration::from_secs(u64::MAX))
-        })
-        .filter(|t| {
-            Duration::from_secs(t.track.duration as u64)
-                >= console_args
-                    .min_length
-                    .unwrap_or(Duration::from_secs(u64::MIN))
-        })
-        .collect();
+    track_groups[0].tracks.retain(|t| {
+        Duration::from_secs(t.track.duration as u64)
+            <= console_args
+                .max_length
+                .unwrap_or(Duration::from_secs(u64::MAX))
+    });
+    track_groups[0].tracks.retain(|t| {
+        Duration::from_secs(t.track.duration as u64)
+            >= console_args
+                .min_length
+                .unwrap_or(Duration::from_secs(u64::MIN))
+    });
 
     // Reorder tracks
     match console_args.order {
         PlayOrder::Descending => {
-            tracks.reverse();
+            track_groups[0].tracks.reverse();
         }
         PlayOrder::Random => {
-            tracks.shuffle(&mut rand::thread_rng());
+            track_groups[0].tracks.shuffle(&mut rand::thread_rng());
         }
         _ => {}
     }
@@ -62,19 +59,7 @@ fn main() {
         if console_args.log {
             hui = Box::new(ui::log::Log::new());
         } else {
-            let header_line = match console_args
-                .time
-                .unwrap_or_else(|| "week".to_string())
-                .to_lowercase()
-                .as_str()
-            {
-                "week" => String::from("Trending tracks of this week"),
-                "month" => String::from("Trending tracks of this month"),
-                "alltime" => String::from("Trending tracks of all time"),
-                &_ => String::from("Trending tracks of... I don't know?!"),
-            };
-
-            hui = Box::new(ui::ncurses::Ncurses::new(header_line));
+            hui = Box::new(ui::ncurses::Ncurses::new(track_groups[0].name.clone()));
         }
     }
     #[cfg(not(feature = "ncurses"))]
@@ -83,9 +68,11 @@ fn main() {
     }
 
     hui.setup();
-    for track in tracks {
-        hui.display(&track);
-        player.play(track.track);
+    for (i, track) in track_groups[0].tracks.iter().enumerate() {
+        hui.display(&track_groups, 0, i);
+        if let Err(err) = player.play(&track.track) {
+            hui.error(&err);
+        }
     }
     hui.cleanup();
 }

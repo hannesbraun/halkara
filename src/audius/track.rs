@@ -17,7 +17,7 @@ pub struct User {
 }
 
 impl Track {
-    pub fn get_stream(&self) -> Option<Bytes> {
+    pub fn get_stream(&self) -> Result<Bytes, reqwest::Error> {
         let api = get_api();
 
         // Get stream
@@ -25,13 +25,6 @@ impl Track {
         reqwest::blocking::get(stream_url)
             .unwrap()
             .bytes()
-            .map_or_else(
-                |err| {
-                    eprintln!("Error: {}", err);
-                    None
-                },
-                Some,
-            )
     }
 
     pub fn get_duration(&self) -> String {

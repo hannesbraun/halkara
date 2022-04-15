@@ -2,7 +2,7 @@ use std::cmp::max;
 
 use ncurses::*;
 
-use crate::audius::TrendingTrack;
+use crate::audius::TrackGroup;
 use crate::HalkaraUi;
 
 pub struct Ncurses {
@@ -30,37 +30,69 @@ impl HalkaraUi for Ncurses {
         }
 
         self.update_header();
-        self.update_footer("Loading...");
+        self.update_footer("Welcome!");
 
         refresh();
     }
 
-    fn display(&self, track: &TrendingTrack) {
+    fn display(&self, track_groups: &[TrackGroup], group: usize, track_index: usize) {
         self.update_header();
-        self.update_footer(&format!("#{:0>3}", track.rank));
 
+        let maxx = getmaxx(stdscr());
         let maxy = getmaxy(stdscr());
-        let starty = max(maxy / 2 - 1, 0);
+        let mid = maxy / 2;
 
-        mvclrtoeol(starty, 3);
-        addstr("Title: ");
-        attron(A_BOLD());
-        addstr(&track.track.title);
-        attroff(A_BOLD());
+        let global_track_index = track_groups[0..group]
+            .iter()
+            .flat_map(|group| &group.tracks)
+            .count()
+            + track_index;
 
-        mvclrtoeol(starty + 1, 3);
-        addstr("User: ");
-        attron(A_BOLD());
-        addstr(&track.track.user.name);
-        attroff(A_BOLD());
+        // Clear lines after mid
+        for i in mid..maxy-1 {
+            mvclrtoeol(i, 0);
+        }
 
-        mvclrtoeol(starty + 2, 3);
-        addstr("Duration: ");
-        attron(A_BOLD());
-        addstr(&track.track.get_duration());
-        attroff(A_BOLD());
+        track_groups
+            .iter()
+            .flat_map(|group| &group.tracks)
+            .enumerate()
+            .for_each(|(i, track)| {
+                let line = i as i32 - global_track_index as i32 + mid;
+                if line > 0 && line < maxy - 1 {
+                    if line == mid {
+                        attron(A_BOLD());
+                        if self.has_colors {
+                            attron(COLOR_PAIR(COLOR_PAIR_BORDER));
+                        }
+                    }
+                    mvclrtoeol(line, 0);
+                    let mut out_without_duration = format!(
+                        "{: >4} {} - {}{}",
+                        track.index,
+                        &track.track.user.name,
+                        &track.track.title,
+                        " ".repeat(maxx as usize)
+                    );
+                    out_without_duration.truncate(max(0, maxx - 7) as usize);
+                    addstr(&out_without_duration);
+                    let mut duration = format!(" {: >6}", &track.track.get_duration());
+                    duration.truncate(7);
+                    mvaddstr(line, maxx - 7, &duration);
+                    if line == mid {
+                        attroff(A_BOLD());
+                        if self.has_colors {
+                            attroff(COLOR_PAIR(COLOR_PAIR_BORDER));
+                        }
+                    }
+                }
+            });
 
         refresh();
+    }
+
+    fn error(&self, msg: &str) {
+        self.update_footer(msg);
     }
 
     fn cleanup(&self) {
@@ -91,7 +123,7 @@ impl Ncurses {
             addstr(&" ".repeat(maxx as usize));
         }
 
-        let header = format!("halkara {} - {}", env!("CARGO_PKG_VERSION"), self.header);
+        let header = format!("Halkara {} - {}", env!("CARGO_PKG_VERSION"), self.header);
         mvaddstr(0, (maxx - header.len() as i32) / 2, &header);
 
         if self.has_colors {

@@ -18,9 +18,14 @@ struct TrendingResponse {
     data: Vec<Track>,
 }
 
-pub struct TrendingTrack {
+pub struct OrderedTrack {
     pub track: Track,
-    pub rank: u8,
+    pub index: u8,
+}
+
+pub struct TrackGroup {
+    pub tracks: Vec<OrderedTrack>,
+    pub name: String,
 }
 
 struct ApiCache {
@@ -66,7 +71,7 @@ fn get_api() -> String {
     url
 }
 
-pub fn get_trending(genre: &str, time: &str) -> Vec<TrendingTrack> {
+pub fn get_trending(genre: &str, time: &str) -> TrackGroup {
     // Select API endpoint
     let api = get_api();
 
@@ -88,12 +93,21 @@ pub fn get_trending(genre: &str, time: &str) -> Vec<TrendingTrack> {
         .expect("Unable to deserialize the list of trending tracks");
 
     // Enrich with the track's rank
-    let mut trending_tracks = Vec::new();
+    let mut trending_tracks = Vec::with_capacity(100);
     let mut rank = 1u8;
     for track in trending_res.data {
-        trending_tracks.push(TrendingTrack { track, rank });
+        trending_tracks.push(OrderedTrack { track, index: rank });
         rank += 1;
     }
 
-    trending_tracks
+    let name = match time.to_lowercase().as_str() {
+        "month" => String::from("Trending tracks of this month"),
+        "alltime" => String::from("Trending tracks of all time"),
+        _ => String::from("Trending tracks of this week"),
+    };
+
+    TrackGroup {
+        tracks: trending_tracks,
+        name,
+    }
 }

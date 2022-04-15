@@ -1,6 +1,6 @@
 use terminal_size::{terminal_size, Width};
 
-use crate::audius::TrendingTrack;
+use crate::audius::TrackGroup;
 use crate::ui::HalkaraUi;
 
 pub struct Log;
@@ -14,12 +14,25 @@ impl Log {
 impl HalkaraUi for Log {
     fn setup(&mut self) {}
 
-    fn display(&self, track: &TrendingTrack) {
+    fn display(&self, track_groups: &[TrackGroup], group: usize, track_index: usize) {
         println!();
-        print_rank(track.rank);
-        println!("Title: {}", track.track.title);
-        println!("User: {}", track.track.user.name);
-        println!("Duration: {}", track.track.get_duration());
+        print_rank(track_groups[group].tracks[track_index].index);
+        println!(
+            "Title: {}",
+            track_groups[group].tracks[track_index].track.title
+        );
+        println!(
+            "User: {}",
+            track_groups[group].tracks[track_index].track.user.name
+        );
+        println!(
+            "Duration: {}",
+            track_groups[group].tracks[track_index].track.get_duration()
+        );
+    }
+
+    fn error(&self, msg: &str) {
+        eprintln!("{}", msg);
     }
 
     fn cleanup(&self) {}

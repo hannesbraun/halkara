@@ -1,3 +1,4 @@
+use crate::args::{is_trending, parse_trending_arg};
 use std::time::Duration;
 
 use crate::player::Player;
@@ -19,34 +20,52 @@ enum PlayOrder {
 fn main() {
     let console_args = unwrap_or_return!(args::handle_args());
 
-    let mut track_groups = vec![audius::get_trending(
-        &console_args.genre.unwrap_or_default(),
-        console_args.time.clone().unwrap_or_default().as_str(),
-    )];
-
-    // Filter tracks
-    track_groups[0].tracks.retain(|t| {
-        Duration::from_secs(t.track.duration as u64)
-            <= console_args
-                .max_length
-                .unwrap_or(Duration::from_secs(u64::MAX))
-    });
-    track_groups[0].tracks.retain(|t| {
-        Duration::from_secs(t.track.duration as u64)
-            >= console_args
-                .min_length
-                .unwrap_or(Duration::from_secs(u64::MIN))
-    });
-
-    // Reorder tracks
-    match console_args.order {
-        PlayOrder::Descending => {
-            track_groups[0].tracks.reverse();
+    let mut track_groups = Vec::with_capacity(std::cmp::max(1, console_args.playables.len()));
+    if console_args.playables.is_empty() {
+        track_groups.push(audius::trending::get_trending(
+            &console_args.genre.unwrap_or_default(),
+            &console_args.time.unwrap_or_default(),
+        ));
+    } else {
+        for playable in console_args.playables {
+            if is_trending(&playable) {
+                let trending_args = parse_trending_arg(&playable);
+                track_groups.push(audius::trending::get_trending(
+                    &trending_args.genre.unwrap_or_default(),
+                    &trending_args.time.unwrap_or_default(),
+                ));
+            } else {
+                track_groups
+                    .append(&mut audius::resolve(&playable).expect("Building final playlist"));
+            }
         }
-        PlayOrder::Random => {
-            shuffle(&mut (track_groups[0].tracks));
+    };
+
+    for group in track_groups.iter_mut() {
+        // Filter tracks
+        group.tracks.retain(|t| {
+            Duration::from_secs(t.track.duration as u64)
+                <= console_args
+                    .max_length
+                    .unwrap_or(Duration::from_secs(u64::MAX))
+        });
+        group.tracks.retain(|t| {
+            Duration::from_secs(t.track.duration as u64)
+                >= console_args
+                    .min_length
+                    .unwrap_or(Duration::from_secs(u64::MIN))
+        });
+
+        // Reorder tracks
+        match console_args.order {
+            PlayOrder::Descending => {
+                group.tracks.reverse();
+            }
+            PlayOrder::Random => {
+                shuffle(&mut (group.tracks));
+            }
+            _ => {}
         }
-        _ => {}
     }
 
     // Create player
@@ -58,7 +77,7 @@ fn main() {
         if console_args.log {
             hui = Box::new(ui::log::Log::new());
         } else {
-            hui = Box::new(ui::ncurses::Ncurses::new(track_groups[0].name.clone()));
+            hui = Box::new(ui::ncurses::Ncurses::new());
         }
     }
     #[cfg(not(feature = "ncurses"))]
@@ -67,10 +86,12 @@ fn main() {
     }
 
     hui.setup();
-    for (i, track) in track_groups[0].tracks.iter().enumerate() {
-        hui.display(&track_groups, 0, i);
-        if let Err(err) = player.play(&track.track) {
-            hui.error(&err);
+    for (i, group) in track_groups.iter().enumerate() {
+        for (j, track) in group.tracks.iter().enumerate() {
+            hui.display(&track_groups, i, j);
+            if let Err(err) = player.play(&track.track) {
+                hui.error(&err);
+            }
         }
     }
     hui.cleanup();

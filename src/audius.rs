@@ -4,23 +4,22 @@ use std::time::Instant;
 use lazy_static::lazy_static;
 use serde::Deserialize;
 
+use playlist::PlaylistResponse;
 use track::Track;
+use track::TracksResponse;
 
+mod playlist;
 pub mod track;
+pub mod trending;
 
 #[derive(Deserialize)]
 struct ApiResponse {
     data: Vec<String>,
 }
 
-#[derive(Deserialize)]
-struct TrendingResponse {
-    data: Vec<Track>,
-}
-
 pub struct OrderedTrack {
     pub track: Track,
-    pub index: u8,
+    pub index: usize,
 }
 
 pub struct TrackGroup {
@@ -72,44 +71,21 @@ fn get_api() -> String {
     url
 }
 
-pub fn get_trending(genre: &str, time: &str) -> TrackGroup {
-    // Select API endpoint
+pub fn resolve(url: &str) -> Result<Vec<TrackGroup>, String> {
     let api = get_api();
-
-    // Get trending tracks
-    let genre_param = if genre.is_empty() {
-        String::new()
-    } else {
-        String::from("&genre=") + genre
-    };
-    let time_param = if time.is_empty() {
-        String::new()
-    } else {
-        String::from("&time=") + time
-    };
-    let trending_url = api + "tracks/trending?app_name=" + APP_NAME + &genre_param + &time_param;
-    let trending_res: TrendingResponse = ureq::get(&trending_url)
+    let resp = ureq::get(format!("{}resolve", api).as_str())
+        .query("app_name", APP_NAME)
+        .query("url", url)
         .call()
-        .expect("Unable to execute GET request for list of trending tracks")
-        .into_json()
-        .expect("Unable to deserialize the list of trending tracks");
+        .unwrap_or_else(|_| panic!("Unable to execute GET request for {}", url))
+        .into_string()
+        .expect("Extracting string from resolve response");
 
-    // Enrich with the track's rank
-    let mut trending_tracks = Vec::with_capacity(100);
-    let mut rank = 1u8;
-    for track in trending_res.data {
-        trending_tracks.push(OrderedTrack { track, index: rank });
-        rank += 1;
-    }
-
-    let name = match time.to_lowercase().as_str() {
-        "month" => String::from("Trending tracks of this month"),
-        "alltime" => String::from("Trending tracks of all time"),
-        _ => String::from("Trending tracks of this week"),
-    };
-
-    TrackGroup {
-        tracks: trending_tracks,
-        name,
+    if let Ok(playlist_response) = ureq::serde_json::from_str::<PlaylistResponse>(&resp) {
+        Ok(playlist_response.track_groups())
+    } else if let Ok(tracks_response) = ureq::serde_json::from_str::<TracksResponse>(&resp) {
+        Ok(vec![tracks_response.track_group()])
+    } else {
+        Err(format!("Unable to resolve {}", url))
     }
 }

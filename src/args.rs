@@ -100,6 +100,38 @@ impl PicoParsable<Duration> for Duration {
     }
 }
 
+pub struct TrendingPlayable {
+    pub(crate) genre: Option<String>,
+    pub(crate) time: Option<String>,
+}
+
+pub fn is_trending(arg: &str) -> bool {
+    arg.starts_with("trending")
+}
+
+pub fn parse_trending_arg(arg: &str) -> TrendingPlayable {
+    let splitted = arg.split(':').collect::<Vec<&str>>();
+    let genre = if splitted.len() > 1 {
+        if !splitted[1].is_empty() {
+            Some(splitted[1].to_string())
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    let time = if splitted.len() > 2 {
+        if !splitted[2].is_empty() {
+            Some(splitted[2].to_string())
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    TrendingPlayable { genre, time }
+}
+
 // Log is only read when the ncurses feature is turned on
 #[allow(dead_code)]
 pub struct ConsoleArgs {
@@ -108,6 +140,7 @@ pub struct ConsoleArgs {
     pub(crate) max_length: Option<Duration>,
     pub(crate) min_length: Option<Duration>,
     pub(crate) order: PlayOrder,
+    pub(crate) playables: Vec<String>,
     pub(crate) time: Option<String>,
     pub(crate) volume: f32,
 }
@@ -138,6 +171,13 @@ pub fn handle_args() -> Option<ConsoleArgs> {
         .expect("parsing volume")
         .unwrap_or_default();
 
+    let playables = args
+        .finish()
+        .into_iter()
+        .map(|s| s.to_str().unwrap_or_default().to_string())
+        .filter(|arg| !arg.starts_with('-'))
+        .collect();
+
     if help {
         print_help();
         return None;
@@ -154,6 +194,7 @@ pub fn handle_args() -> Option<ConsoleArgs> {
         min_length,
         max_length,
         order,
+        playables,
         time,
         volume,
     })
@@ -162,7 +203,7 @@ pub fn handle_args() -> Option<ConsoleArgs> {
 fn print_help() {
     println!(
         "USAGE:
-    halkara [OPTIONS]
+    halkara [OPTIONS] [URLS]
 
 OPTIONS:
     -g, --genre <GENRE>      Selects the trending tracks for a specified genre

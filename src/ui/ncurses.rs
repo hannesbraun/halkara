@@ -2,12 +2,11 @@ use std::cmp::max;
 
 use ncurses::*;
 
+use super::HalkaraUi;
 use crate::audius::TrackGroup;
-use crate::HalkaraUi;
 
 pub struct Ncurses {
     has_colors: bool,
-    header: String,
 }
 
 const COLOR_PAIR_BORDER: i16 = 1;
@@ -29,14 +28,14 @@ impl HalkaraUi for Ncurses {
             );
         }
 
-        self.update_header();
+        self.update_header("Idle");
         self.update_footer("Welcome!");
 
         refresh();
     }
 
     fn display(&self, track_groups: &[TrackGroup], group: usize, track_index: usize) {
-        self.update_header();
+        self.update_header(&track_groups[group].name);
 
         let maxx = getmaxx(stdscr());
         let maxy = getmaxy(stdscr());
@@ -107,14 +106,11 @@ fn mvclrtoeol(y: i32, x: i32) {
 }
 
 impl Ncurses {
-    pub fn new(header: String) -> Ncurses {
-        Ncurses {
-            has_colors: false,
-            header,
-        }
+    pub fn new() -> Ncurses {
+        Ncurses { has_colors: false }
     }
 
-    fn update_header(&self) {
+    fn update_header(&self, header_str: &str) {
         let maxx = getmaxx(stdscr());
 
         if self.has_colors {
@@ -123,7 +119,7 @@ impl Ncurses {
             addstr(&" ".repeat(maxx as usize));
         }
 
-        let header = format!("Halkara {} - {}", env!("CARGO_PKG_VERSION"), self.header);
+        let header = format!("Halkara {} - {}", env!("CARGO_PKG_VERSION"), header_str);
         mvaddstr(0, (maxx - header.len() as i32) / 2, &header);
 
         if self.has_colors {

@@ -1,7 +1,7 @@
 use terminal_size::{terminal_size, Width};
 
+use super::HalkaraUi;
 use crate::audius::TrackGroup;
-use crate::ui::HalkaraUi;
 
 pub struct Log;
 
@@ -38,7 +38,7 @@ impl HalkaraUi for Log {
     fn cleanup(&self) {}
 }
 
-fn print_rank(rank: u8) {
+fn print_rank(rank: usize) {
     let term_size = terminal_size();
     let width = if let Some((Width(w), _)) = term_size {
         w

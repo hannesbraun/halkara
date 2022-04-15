@@ -55,9 +55,10 @@ fn get_api() -> String {
     }
 
     if update_cache {
-        let api_res = reqwest::blocking::get("https://api.audius.co")
+        let api_res: ApiResponse = ureq::get("https://api.audius.co")
+            .call()
             .unwrap()
-            .json::<ApiResponse>()
+            .into_json()
             .unwrap();
         url = String::from(api_res.data.first().unwrap()) + "/v1/";
 
@@ -87,9 +88,10 @@ pub fn get_trending(genre: &str, time: &str) -> TrackGroup {
         String::from("&time=") + time
     };
     let trending_url = api + "tracks/trending?app_name=" + APP_NAME + &genre_param + &time_param;
-    let trending_res = reqwest::blocking::get(trending_url)
+    let trending_res: TrendingResponse = ureq::get(&trending_url)
+        .call()
         .expect("Unable to execute GET request for list of trending tracks")
-        .json::<TrendingResponse>()
+        .into_json()
         .expect("Unable to deserialize the list of trending tracks");
 
     // Enrich with the track's rank

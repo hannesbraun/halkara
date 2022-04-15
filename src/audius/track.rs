@@ -1,4 +1,5 @@
-use bytes::Bytes;
+use std::io::Read;
+
 use serde::Deserialize;
 
 use super::{get_api, APP_NAME};
@@ -17,12 +18,15 @@ pub struct User {
 }
 
 impl Track {
-    pub fn get_stream(&self) -> Result<Bytes, reqwest::Error> {
+    pub fn get_stream(&self) -> Result<Vec<u8>, ureq::Error> {
         let api = get_api();
 
         // Get stream
         let stream_url = api + "tracks/" + &self.id + "/stream?app_name=" + APP_NAME;
-        reqwest::blocking::get(stream_url).unwrap().bytes()
+        let resp = ureq::get(&stream_url).call()?;
+        let mut bytes = Vec::with_capacity(self.duration as usize * 320 / 8);
+        resp.into_reader().read_to_end(&mut bytes)?;
+        Ok(bytes)
     }
 
     pub fn get_duration(&self) -> String {

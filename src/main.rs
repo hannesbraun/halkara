@@ -1,9 +1,8 @@
 use std::time::Duration;
 
-use rand::seq::SliceRandom;
-
 use crate::player::Player;
 use crate::ui::HalkaraUi;
+use crate::utils::shuffle;
 
 mod args;
 mod audius;
@@ -45,7 +44,7 @@ fn main() {
             track_groups[0].tracks.reverse();
         }
         PlayOrder::Random => {
-            track_groups[0].tracks.shuffle(&mut rand::thread_rng());
+            shuffle(&mut (track_groups[0].tracks));
         }
         _ => {}
     }

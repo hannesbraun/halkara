@@ -22,9 +22,7 @@ impl Track {
 
         // Get stream
         let stream_url = api + "tracks/" + &self.id + "/stream?app_name=" + APP_NAME;
-        reqwest::blocking::get(stream_url)
-            .unwrap()
-            .bytes()
+        reqwest::blocking::get(stream_url).unwrap().bytes()
     }
 
     pub fn get_duration(&self) -> String {

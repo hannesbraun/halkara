@@ -49,7 +49,7 @@ impl HalkaraUi for Ncurses {
             + track_index;
 
         // Clear lines after mid
-        for i in mid..maxy-1 {
+        for i in mid..maxy - 1 {
             mvclrtoeol(i, 0);
         }
 

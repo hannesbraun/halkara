@@ -37,8 +37,8 @@ impl HalkaraUi for Ncurses {
     fn display(&self, track_groups: &[TrackGroup], group: usize, track_index: usize) {
         self.update_header(&track_groups[group].name);
 
-        let maxx = getmaxx(stdscr());
-        let maxy = getmaxy(stdscr());
+        let (mut maxy, mut maxx) = (0, 0);
+        getmaxyx(stdscr(), &mut maxy, &mut maxx);
         let mid = maxy / 2;
 
         let global_track_index = track_groups[0..group]
@@ -128,8 +128,8 @@ impl Ncurses {
     }
 
     fn update_footer(&self, text: &str) {
-        let maxx = getmaxx(stdscr());
-        let maxy = getmaxy(stdscr());
+        let (mut maxy, mut maxx) = (0, 0);
+        getmaxyx(stdscr(), &mut maxy, &mut maxx);
 
         if self.has_colors {
             attron(COLOR_PAIR(COLOR_PAIR_BORDER));

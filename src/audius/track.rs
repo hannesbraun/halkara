@@ -1,5 +1,6 @@
 use std::io::Read;
 
+use super::user::User;
 use super::OrderedTrack;
 use serde::Deserialize;
 
@@ -15,12 +16,7 @@ pub struct Track {
 
 #[derive(Deserialize)]
 pub struct TracksResponse {
-    data: Vec<Track>,
-}
-
-#[derive(Deserialize)]
-pub struct User {
-    pub name: String,
+    pub data: Vec<Track>,
 }
 
 impl TracksResponse {

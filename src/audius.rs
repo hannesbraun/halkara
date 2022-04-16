@@ -5,12 +5,13 @@ use lazy_static::lazy_static;
 use serde::Deserialize;
 
 use playlist::PlaylistResponse;
-use track::Track;
-use track::TracksResponse;
+use track::{Track, TracksResponse};
+use user::UserResponse;
 
 mod playlist;
 pub mod track;
 pub mod trending;
+mod user;
 
 #[derive(Deserialize)]
 struct ApiResponse {
@@ -85,6 +86,8 @@ pub fn resolve(url: &str) -> Result<Vec<TrackGroup>, String> {
         Ok(playlist_response.track_groups())
     } else if let Ok(tracks_response) = ureq::serde_json::from_str::<TracksResponse>(&resp) {
         Ok(vec![tracks_response.track_group()])
+    } else if let Ok(user_response) = ureq::serde_json::from_str::<UserResponse>(&resp) {
+        Ok(vec![user_response.track_group()])
     } else {
         Err(format!("Unable to resolve {}", url))
     }

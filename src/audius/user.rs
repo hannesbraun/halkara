@@ -20,12 +20,7 @@ impl UserResponse {
         let tracks_response: TracksResponse = ureq::get(&tracks_url)
             .query("app_name", APP_NAME)
             .call()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Unable to execute GET request for user {}",
-                    self.data.name
-                )
-            })
+            .unwrap_or_else(|_| panic!("Unable to execute GET request for user {}", self.data.name))
             .into_json()
             .unwrap_or_else(|_| {
                 panic!(

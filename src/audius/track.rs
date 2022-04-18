@@ -19,6 +19,11 @@ pub struct TracksResponse {
     pub data: Vec<Track>,
 }
 
+#[derive(Deserialize)]
+pub struct TrackResponse {
+    pub data: Track,
+}
+
 impl TracksResponse {
     pub fn track_group(self) -> TrackGroup {
         TrackGroup {

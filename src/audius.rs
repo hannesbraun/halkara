@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 use serde::Deserialize;
 
 use playlist::PlaylistResponse;
-use track::{Track, TracksResponse};
+use track::{Track, TrackResponse, TracksResponse};
 use user::UserResponse;
 
 mod playlist;
@@ -60,7 +60,24 @@ fn get_api() -> String {
             .unwrap()
             .into_json()
             .unwrap();
-        url = String::from(api_res.data.first().unwrap()) + "/v1/";
+        let mut endpoints = api_res.data.into_iter();
+
+        let mut works = false;
+        while !works {
+            // Select endpoint
+            url = endpoints.next().expect("Selecting API endpoint") + "/v1/";
+
+            // Test endpoint
+            let resp_result = ureq::get(format!("{}tracks/QxamW", url).as_str())
+                .query("app_name", APP_NAME)
+                .call();
+            if let Ok(resp) = resp_result {
+                let track: Result<TrackResponse, _> = resp.into_json();
+                if track.is_ok() {
+                    works = true;
+                }
+            }
+        }
 
         if let Ok(mut cache) = API_CACHE.write() {
             // Cache for next call

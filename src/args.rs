@@ -230,7 +230,8 @@ OPTIONS:
     -o, --order <ORDER>      The order in which to play the trending tracks [possible values: asc,
                              desc, rand]
     -t, --time <TIME>        Selects the trending tracks over a specified time range
-        --ui <UI>            The user interface variant to use [possible values: log, ncurses]
+        --ui <UI>            The user interface variant to use [possible values: compact, log,
+                             ncurses]
     -V, --version            Print version information
         --volume <VOLUME>    The volume in dBFS"
     );

@@ -1,6 +1,7 @@
 use super::{Event, HalkaraUi};
 use crate::audius::TrackGroup;
 use crate::ui::utils::term_width;
+use console::Term;
 use std::sync::mpsc::Sender;
 
 pub struct Log;
@@ -59,14 +60,14 @@ fn print_rank(rank: usize) {
 }
 
 pub(crate) fn event_reader(sender: Sender<Event>) {
+    let term = Term::stdout();
     loop {
-        let mut cmd = String::new();
-        std::io::stdin().read_line(&mut cmd).unwrap_or_default();
-        match cmd.trim() {
-            "quit" => {
+        let cmd = term.read_char().unwrap_or_default();
+        match cmd {
+            'q' => {
                 sender.send(Event::Quit).expect("Sending quit event");
             }
-            "pause" => {
+            ' ' => {
                 sender.send(Event::Pause).expect("Sending pause event");
             }
             _ => {}

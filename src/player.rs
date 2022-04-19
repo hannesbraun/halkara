@@ -69,6 +69,23 @@ impl Player {
         }
     }
 
+    const VOLUME_ADJUST: f32 = 0.69;
+
+    pub fn volume_up(&self) {
+        if let Ok(sink) = self.sink.read() {
+            let vol = (1.0 / Player::VOLUME_ADJUST) * sink.volume();
+            if vol <= 1.0 {
+                sink.set_volume(vol);
+            }
+        }
+    }
+
+    pub fn volume_down(&self) {
+        if let Ok(sink) = self.sink.read() {
+            sink.set_volume(Player::VOLUME_ADJUST * sink.volume());
+        }
+    }
+
     fn sleep_until_end(&self) {
         let event_sender = self.event_sender.clone();
         let sink = self.sink.clone();

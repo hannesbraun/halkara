@@ -70,6 +70,16 @@ pub(crate) fn event_reader(sender: Sender<Event>) {
             ' ' => {
                 sender.send(Event::Pause).expect("Sending pause event");
             }
+            '+' => {
+                sender
+                    .send(Event::VolumeUp)
+                    .expect("Sending volume up event");
+            }
+            '-' => {
+                sender
+                    .send(Event::VolumeDown)
+                    .expect("Sending volume down event");
+            }
             _ => {}
         }
     }

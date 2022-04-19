@@ -120,6 +120,12 @@ fn main() {
                     Event::TrackEnd => {
                         break;
                     }
+                    Event::VolumeUp => {
+                        player.volume_up();
+                    }
+                    Event::VolumeDown => {
+                        player.volume_down();
+                    }
                 }
             }
 

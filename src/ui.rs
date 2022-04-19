@@ -27,4 +27,6 @@ pub enum Event {
     Pause,
     Quit,
     TrackEnd,
+    VolumeUp,
+    VolumeDown,
 }

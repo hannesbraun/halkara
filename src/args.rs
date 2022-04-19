@@ -160,7 +160,7 @@ pub struct ConsoleArgs {
 
 pub fn handle_args() -> Option<ConsoleArgs> {
     let mut args = pico_args::Arguments::from_env();
-    let genre: Option<String> = args
+    let genre = args
         .opt_value_from_str(["-g", "--genre"])
         .expect("parsing genre");
     let help = args.contains(["-h", "--help"]);
@@ -174,7 +174,7 @@ pub fn handle_args() -> Option<ConsoleArgs> {
         .opt_value_from_fn(["-o", "--order"], PlayOrder::pico_parse)
         .expect("parsing order")
         .unwrap_or(PlayOrder::Ascending);
-    let time: Option<String> = args
+    let time = args
         .opt_value_from_str(["-t", "--time"])
         .expect("parsing time");
     let ui = args

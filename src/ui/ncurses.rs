@@ -2,7 +2,7 @@ use super::{Event, HalkaraUi};
 use crate::audius::TrackGroup;
 use ncurses::*;
 use std::cmp::max;
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::mpsc::Sender;
 
 pub struct Ncurses {
     has_colors: bool,

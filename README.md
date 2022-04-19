@@ -29,6 +29,29 @@ Playing the trending tracks within the genre "Electronic" in descending order
 halkara --genre Electronic --order desc
 ```
 
+### Controls
+
+The following keys can be hit while Halkara is running to trigger some actions:
+
+- `q`: quit the application
+- `<space>`: play/pause
+- `+`: increase volume
+- `-`: decrease volume
+
+## Ncurses
+
+An additional ncurses-based exists but won't be added to the build by default. Its state is rather incomplete. Handling user input does not work due to multithreading issue with ncurses. The same applies for resizing the terminal window. After a resize, the user interface may look weird.
+Try it out if you're curious :)
+
+### Building
+
+Add the `ncurses` feature to the build and you should be good to go.
+```bash
+cargo build --release --features ncurses
+```
+
+See https://github.com/jeaye/ncurses-rs/issues/191 if you have trouble getting ncurses to compile on openSUSE (or maybe other distros as well).
+
 ## License
 
 Halkara is released under the BSD 2-Clause License. For more information see [LICENSE](LICENSE).

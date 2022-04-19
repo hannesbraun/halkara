@@ -183,10 +183,11 @@ pub fn handle_args() -> Option<ConsoleArgs> {
         .expect("parsing ui variant")
         .unwrap_or(UiVariant::Log);
     let version = args.contains(["-V", "--version"]);
-    let volume: f32 = args
-        .opt_value_from_str("--volume")
+    let volume = args
+        .opt_value_from_str::<_, f32>("--volume")
         .expect("parsing volume")
-        .unwrap_or_default();
+        .unwrap_or_default()
+        .min(0.0);
 
     let playables = args
         .finish()

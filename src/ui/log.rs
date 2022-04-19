@@ -1,7 +1,7 @@
-use terminal_size::{terminal_size, Width};
-
-use super::HalkaraUi;
+use super::{Event, HalkaraUi};
 use crate::audius::TrackGroup;
+use std::sync::mpsc::Sender;
+use terminal_size::{terminal_size, Width};
 
 pub struct Log;
 
@@ -13,6 +13,22 @@ impl Log {
 
 impl HalkaraUi for Log {
     fn setup(&mut self) {}
+
+    fn start_reader(&self, sender: Sender<Event>) {
+        std::thread::spawn(move || loop {
+            let mut cmd = String::new();
+            std::io::stdin().read_line(&mut cmd).unwrap_or_default();
+            match cmd.trim() {
+                "quit" => {
+                    sender.send(Event::Quit).expect("Sending quit event");
+                }
+                "pause" => {
+                    sender.send(Event::Pause).expect("Sending pause event");
+                }
+                _ => {}
+            }
+        });
+    }
 
     fn display(&self, track_groups: &[TrackGroup], group: usize, track_index: usize) {
         println!();

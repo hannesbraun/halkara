@@ -1,9 +1,9 @@
 use crate::args::{is_trending, parse_trending_arg};
-use std::time::Duration;
-
 use crate::player::Player;
-use crate::ui::HalkaraUi;
+use crate::ui::{Event, HalkaraUi};
 use crate::utils::shuffle;
+use std::sync::mpsc::channel;
+use std::time::Duration;
 
 mod args;
 mod audius;
@@ -68,8 +68,11 @@ fn main() {
         }
     }
 
+    // Create event channel
+    let (event_sender, event_receiver) = channel();
+
     // Create player
-    let player = Player::new(console_args.volume);
+    let player = Player::new(event_sender.clone(), console_args.volume);
 
     let mut hui: Box<dyn HalkaraUi>;
     #[cfg(feature = "ncurses")]
@@ -84,15 +87,42 @@ fn main() {
     {
         hui = Box::new(ui::log::Log::new());
     }
+    hui.start_reader(event_sender);
 
     hui.setup();
+
+    let mut quit = false;
     for (i, group) in track_groups.iter().enumerate() {
         for (j, track) in group.tracks.iter().enumerate() {
             hui.display(&track_groups, i, j);
             if let Err(err) = player.play(&track.track) {
                 hui.error(&err);
             }
+
+            // Wait for input or track end
+            loop {
+                match event_receiver.recv().expect("Receiving event") {
+                    Event::Pause => {
+                        player.pause();
+                    }
+                    Event::Quit => {
+                        quit = true;
+                        break;
+                    }
+                    Event::TrackEnd => {
+                        break;
+                    }
+                }
+            }
+
+            if quit {
+                break;
+            }
+        }
+        if quit {
+            break;
         }
     }
+
     hui.cleanup();
 }

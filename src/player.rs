@@ -1,18 +1,22 @@
 use std::io::Cursor;
 use std::str;
+use std::sync::mpsc::Sender;
+use std::sync::{Arc, RwLock};
 
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
 
 use crate::audius::track;
+use crate::Event;
 
 pub struct Player {
     _stream: OutputStream,
     _stream_handle: OutputStreamHandle,
-    sink: Sink,
+    event_sender: Sender<Event>,
+    sink: Arc<RwLock<Sink>>,
 }
 
 impl Player {
-    pub fn new(volume: f32) -> Player {
+    pub fn new(event_sender: Sender<Event>, volume: f32) -> Player {
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
         if volume != 0.0 {
@@ -23,7 +27,8 @@ impl Player {
         Player {
             _stream,
             _stream_handle: stream_handle,
-            sink,
+            event_sender,
+            sink: Arc::new(RwLock::new(sink)),
         }
     }
 
@@ -42,12 +47,38 @@ impl Player {
         let cursor = Cursor::new(stream);
         let decoder = Decoder::new(cursor);
         match decoder {
-            Ok(decoder) => {
-                self.sink.append(decoder);
-                self.sink.sleep_until_end();
-                Ok(())
-            }
+            Ok(decoder) => match self.sink.read() {
+                Ok(sink) => {
+                    sink.append(decoder);
+                    self.sleep_until_end();
+                    Ok(())
+                }
+                Err(e) => Err(e.to_string()),
+            },
             Err(_) => Err(error_msg),
         }
+    }
+
+    pub fn pause(&self) {
+        if let Ok(sink) = self.sink.read() {
+            if sink.is_paused() {
+                sink.play();
+            } else {
+                sink.pause();
+            }
+        }
+    }
+
+    fn sleep_until_end(&self) {
+        let event_sender = self.event_sender.clone();
+        let sink = self.sink.clone();
+        std::thread::spawn(move || {
+            if let Ok(sink) = sink.read() {
+                sink.sleep_until_end();
+                event_sender
+                    .send(Event::TrackEnd)
+                    .expect("Sending track end event");
+            }
+        });
     }
 }

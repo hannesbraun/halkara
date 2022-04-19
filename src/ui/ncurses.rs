@@ -1,9 +1,8 @@
-use std::cmp::max;
-
-use ncurses::*;
-
-use super::HalkaraUi;
+use super::{Event, HalkaraUi};
 use crate::audius::TrackGroup;
+use ncurses::*;
+use std::cmp::max;
+use std::sync::mpsc::{Receiver, Sender};
 
 pub struct Ncurses {
     has_colors: bool,
@@ -17,6 +16,8 @@ impl HalkaraUi for Ncurses {
         keypad(stdscr(), true);
         noecho();
         curs_set(CURSOR_VISIBILITY::CURSOR_INVISIBLE);
+        nodelay(stdscr(), false);
+        cbreak();
 
         self.has_colors = has_colors();
         if self.has_colors {
@@ -32,6 +33,25 @@ impl HalkaraUi for Ncurses {
         self.update_footer("Welcome!");
 
         refresh();
+    }
+
+    fn start_reader(&self, _sender: Sender<Event>) {
+        // Unsupported due to multithreading
+        /*std::thread::spawn(move || {
+            let mut key;
+            loop {
+                key = getch();
+                match char::from_u32(key as u32).unwrap_or_default() {
+                    'q' => {
+                        sender.send(Event::Quit).expect("Sending quit event");
+                    }
+                    ' ' => {
+                        sender.send(Event::Pause).expect("Sending pause event");
+                    }
+                    _ => {}
+                }
+            }
+        });*/
     }
 
     fn display(&self, track_groups: &[TrackGroup], group: usize, track_index: usize) {

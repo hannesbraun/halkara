@@ -65,7 +65,8 @@ pub(crate) fn event_reader(sender: Sender<Event>) {
         let cmd = term.read_char().unwrap_or_default();
         match cmd {
             'q' => {
-                sender.send(Event::Quit).expect("Sending quit event");
+                // Quit event will be sent after loop
+                break;
             }
             ' ' => {
                 sender.send(Event::Pause).expect("Sending pause event");
@@ -83,4 +84,6 @@ pub(crate) fn event_reader(sender: Sender<Event>) {
             _ => {}
         }
     }
+
+    sender.send(Event::Quit).expect("Sending quit event");
 }

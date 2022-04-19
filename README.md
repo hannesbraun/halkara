@@ -1,6 +1,6 @@
 # Halkara
 
-Halkara is a simple command line utility to play the tracks that are currently trending on Audius.
+Halkara is a simple command line utility to play content on Audius.
 
 ## Usage
 

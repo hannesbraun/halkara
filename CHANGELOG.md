@@ -1,5 +1,15 @@
 # Changelog
 
+0.3.0
+------
+* Tracks, Playlists and User profiles can now also be played
+* New compact log UI
+* New optional ncurses UI (disabled by default)
+* New keyboard bindings for quitting, pausing and adjusting volume
+* New parameters: `--min-length`, `--max-length` and `--ui`
+* Improved API endpoint selection
+* The volume is now limited to 0 dBFS
+
 0.2.1
 ------
 * The rank line width is now dependent on the terminal width

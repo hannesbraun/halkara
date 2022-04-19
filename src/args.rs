@@ -1,6 +1,7 @@
 use crate::PlayOrder;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+use std::num::ParseIntError;
 use std::time::Duration;
 
 #[derive(Debug)]
@@ -45,7 +46,6 @@ impl PicoParsable<PlayOrder> for PlayOrder {
     }
 }
 
-use std::num::ParseIntError;
 impl PicoParsable<Duration> for Duration {
     fn pico_parse(str: &str) -> Result<Duration, ParseArgError> {
         // Split into strings consisting of number and unit

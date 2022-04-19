@@ -1,6 +1,6 @@
 use crate::args::{is_trending, parse_trending_arg};
 use crate::player::Player;
-use crate::ui::{Event, HalkaraUi};
+use crate::ui::{Event, HalkaraUi, UiVariant};
 use crate::utils::shuffle;
 use std::sync::mpsc::channel;
 use std::time::Duration;
@@ -77,15 +77,21 @@ fn main() {
     let mut hui: Box<dyn HalkaraUi>;
     #[cfg(feature = "ncurses")]
     {
-        if console_args.log {
-            hui = Box::new(ui::log::Log::new());
-        } else {
-            hui = Box::new(ui::ncurses::Ncurses::new());
+        hui = match console_args.ui {
+            UiVariant::Log => Box::new(ui::log::Log::new()),
+            UiVariant::Ncurses => Box::new(ui::ncurses::Ncurses::new()),
         }
     }
     #[cfg(not(feature = "ncurses"))]
     {
-        hui = Box::new(ui::log::Log::new());
+        hui = match console_args.ui {
+            UiVariant::Log => Box::new(ui::log::Log::new()),
+            UiVariant::Ncurses => {
+                eprintln!("Error: Halkara was built without ncurses support");
+                use std::process::exit;
+                exit(1);
+            }
+        }
     }
     hui.start_reader(event_sender);
 

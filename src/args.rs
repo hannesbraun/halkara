@@ -1,3 +1,4 @@
+use crate::ui::UiVariant;
 use crate::PlayOrder;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -41,6 +42,18 @@ impl PicoParsable<PlayOrder> for PlayOrder {
             "rand" => Ok(PlayOrder::Random),
             _ => Err(ParseArgError {
                 details: str.to_owned() + " is not a valid order",
+            }),
+        }
+    }
+}
+
+impl PicoParsable<UiVariant> for UiVariant {
+    fn pico_parse(str: &str) -> Result<UiVariant, ParseArgError> {
+        match str.to_lowercase().as_str() {
+            "log" => Ok(UiVariant::Log),
+            "ncurses" => Ok(UiVariant::Ncurses),
+            _ => Err(ParseArgError {
+                details: str.to_owned() + " is not a valid UI variant",
             }),
         }
     }
@@ -136,11 +149,11 @@ pub fn parse_trending_arg(arg: &str) -> TrendingPlayable {
 #[allow(dead_code)]
 pub struct ConsoleArgs {
     pub(crate) genre: Option<String>,
-    pub(crate) log: bool,
     pub(crate) max_length: Option<Duration>,
     pub(crate) min_length: Option<Duration>,
     pub(crate) order: PlayOrder,
     pub(crate) playables: Vec<String>,
+    pub(crate) ui: UiVariant,
     pub(crate) time: Option<String>,
     pub(crate) volume: f32,
 }
@@ -151,7 +164,6 @@ pub fn handle_args() -> Option<ConsoleArgs> {
         .opt_value_from_str(["-g", "--genre"])
         .expect("parsing genre");
     let help = args.contains(["-h", "--help"]);
-    let log = args.contains("--log");
     let max_length: Option<Duration> = args
         .opt_value_from_fn("--max-length", Duration::pico_parse)
         .expect("parsing max-length");
@@ -165,6 +177,10 @@ pub fn handle_args() -> Option<ConsoleArgs> {
     let time: Option<String> = args
         .opt_value_from_str(["-t", "--time"])
         .expect("parsing time");
+    let ui = args
+        .opt_value_from_fn("--ui", UiVariant::pico_parse)
+        .expect("parsing ui variant")
+        .unwrap_or(UiVariant::Log);
     let version = args.contains(["-V", "--version"]);
     let volume: f32 = args
         .opt_value_from_str("--volume")
@@ -190,12 +206,12 @@ pub fn handle_args() -> Option<ConsoleArgs> {
 
     Some(ConsoleArgs {
         genre,
-        log,
         min_length,
         max_length,
         order,
         playables,
         time,
+        ui,
         volume,
     })
 }
@@ -208,12 +224,12 @@ fn print_help() {
 OPTIONS:
     -g, --genre <GENRE>      Selects the trending tracks for a specified genre
     -h, --help               Print help information
-        --log                Switches to the log user interface
         --max-length         The maximum length for a track (longer tracks won't be played)
         --min-length         The minimum length for a track (shorter tracks won't be played)
     -o, --order <ORDER>      The order in which to play the trending tracks [possible values: asc,
                              desc, rand]
     -t, --time <TIME>        Selects the trending tracks over a specified time range
+        --ui <UI>            The user interface variant to use [possible values: log, ncurses]
     -V, --version            Print version information
         --volume <VOLUME>    The volume in dBFS"
     );

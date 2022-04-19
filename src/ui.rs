@@ -14,6 +14,11 @@ pub trait HalkaraUi {
     fn cleanup(&self);
 }
 
+pub enum UiVariant {
+    Log,
+    Ncurses,
+}
+
 #[derive(Debug)]
 pub enum Event {
     Pause,

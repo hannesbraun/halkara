@@ -78,6 +78,7 @@ fn main() {
     #[cfg(feature = "ncurses")]
     {
         hui = match console_args.ui {
+            UiVariant::Compact => Box::new(ui::compact::Compact::new()),
             UiVariant::Log => Box::new(ui::log::Log::new()),
             UiVariant::Ncurses => Box::new(ui::ncurses::Ncurses::new()),
         }
@@ -85,6 +86,7 @@ fn main() {
     #[cfg(not(feature = "ncurses"))]
     {
         hui = match console_args.ui {
+            UiVariant::Compact => Box::new(ui::compact::Compact::new()),
             UiVariant::Log => Box::new(ui::log::Log::new()),
             UiVariant::Ncurses => {
                 eprintln!("Error: Halkara was built without ncurses support");

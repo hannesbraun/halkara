@@ -50,6 +50,7 @@ impl PicoParsable<PlayOrder> for PlayOrder {
 impl PicoParsable<UiVariant> for UiVariant {
     fn pico_parse(str: &str) -> Result<UiVariant, ParseArgError> {
         match str.to_lowercase().as_str() {
+            "compact" => Ok(UiVariant::Compact),
             "log" => Ok(UiVariant::Log),
             "ncurses" => Ok(UiVariant::Ncurses),
             _ => Err(ParseArgError {

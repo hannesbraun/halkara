@@ -1,7 +1,7 @@
 use super::{Event, HalkaraUi};
 use crate::audius::TrackGroup;
+use crate::ui::utils::term_width;
 use std::sync::mpsc::Sender;
-use terminal_size::{terminal_size, Width};
 
 pub struct Log;
 
@@ -15,19 +15,7 @@ impl HalkaraUi for Log {
     fn setup(&mut self) {}
 
     fn start_reader(&self, sender: Sender<Event>) {
-        std::thread::spawn(move || loop {
-            let mut cmd = String::new();
-            std::io::stdin().read_line(&mut cmd).unwrap_or_default();
-            match cmd.trim() {
-                "quit" => {
-                    sender.send(Event::Quit).expect("Sending quit event");
-                }
-                "pause" => {
-                    sender.send(Event::Pause).expect("Sending pause event");
-                }
-                _ => {}
-            }
-        });
+        std::thread::spawn(move || event_reader(sender));
     }
 
     fn display(&self, track_groups: &[TrackGroup], group: usize, track_index: usize) {
@@ -55,12 +43,7 @@ impl HalkaraUi for Log {
 }
 
 fn print_rank(rank: usize) {
-    let term_size = terminal_size();
-    let width = if let Some((Width(w), _)) = term_size {
-        w
-    } else {
-        80
-    };
+    let width = term_width();
 
     let line_char = "=";
     let rank_width = 6;
@@ -73,4 +56,20 @@ fn print_rank(rank: usize) {
     };
 
     println!("{} #{:0>3} {}{}", half_line, rank, half_line, filler);
+}
+
+pub(crate) fn event_reader(sender: Sender<Event>) {
+    loop {
+        let mut cmd = String::new();
+        std::io::stdin().read_line(&mut cmd).unwrap_or_default();
+        match cmd.trim() {
+            "quit" => {
+                sender.send(Event::Quit).expect("Sending quit event");
+            }
+            "pause" => {
+                sender.send(Event::Pause).expect("Sending pause event");
+            }
+            _ => {}
+        }
+    }
 }

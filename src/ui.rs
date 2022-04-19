@@ -1,7 +1,9 @@
 use crate::audius::TrackGroup;
 use std::sync::mpsc::Sender;
 
+pub mod compact;
 pub mod log;
+mod utils;
 
 #[cfg(feature = "ncurses")]
 pub mod ncurses;
@@ -15,6 +17,7 @@ pub trait HalkaraUi {
 }
 
 pub enum UiVariant {
+    Compact,
     Log,
     Ncurses,
 }

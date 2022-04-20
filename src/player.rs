@@ -73,7 +73,7 @@ impl Player {
 
     pub fn volume_up(&self) {
         if let Ok(sink) = self.sink.read() {
-            let vol = (1.0 / Player::VOLUME_ADJUST) * sink.volume();
+            let vol = sink.volume() / Player::VOLUME_ADJUST;
             if vol <= 1.0 {
                 sink.set_volume(vol);
             }

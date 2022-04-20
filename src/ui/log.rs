@@ -1,7 +1,7 @@
-use super::{Event, HalkaraUi};
+use super::{utils::term_width, Event, HalkaraUi};
 use crate::audius::TrackGroup;
-use crate::ui::utils::term_width;
-use console::Term;
+use std::borrow::BorrowMut;
+use std::io::{stdin, BufRead};
 use std::sync::mpsc::Sender;
 
 pub struct Log;
@@ -60,10 +60,18 @@ fn print_rank(rank: usize) {
 }
 
 pub(crate) fn event_reader(sender: Sender<Event>) {
-    let term = Term::stdout();
+    let mut pressed_keys = Vec::new();
     loop {
-        let cmd = term.read_char().unwrap_or_default();
-        match cmd {
+        if pressed_keys.is_empty() {
+            let mut line = String::new();
+            stdin()
+                .lock()
+                .read_line(&mut line)
+                .expect("Reading line from stdin");
+            pressed_keys.append(line.chars().collect::<Vec<char>>().borrow_mut());
+        }
+
+        match pressed_keys.drain(0..1).next().unwrap_or_default() {
             'q' => {
                 // Quit event will be sent after loop
                 break;

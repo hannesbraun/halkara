@@ -105,6 +105,7 @@ fn main() {
             hui.display(&track_groups, i, j);
             if let Err(err) = player.play(&track.track) {
                 hui.error(&err);
+                continue;
             }
 
             // Wait for input or track end

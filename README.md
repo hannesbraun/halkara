@@ -38,6 +38,8 @@ The following keys can be hit while Halkara is running to trigger some actions:
 - `+`: increase volume
 - `-`: decrease volume
 
+You need to press enter after pressing those keys.
+
 ## Ncurses
 
 An additional ncurses-based exists but won't be added to the build by default. Its state is rather incomplete. Handling user input does not work due to multithreading issue with ncurses. The same applies for resizing the terminal window. After a resize, the user interface may look weird.

@@ -1,5 +1,10 @@
 # Changelog
 
+0.4.0
+------
+This is a hotfix release due to a problem with the input method, which resulted in a badly formatted output.
+* Changed input method: you need to press enter now to have your input commands recognized
+
 0.3.0
 ------
 * Tracks, Playlists and User profiles can now also be played

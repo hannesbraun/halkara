@@ -1,5 +1,9 @@
 # Changelog
 
+0.4.1
+------
+* Fixed hanging application after trying to play an unavailable track
+
 0.4.0
 ------
 This is a hotfix release due to a problem with the input method, which resulted in a badly formatted output.

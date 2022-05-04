@@ -15,7 +15,8 @@ struct Lcg {
 }
 
 impl Lcg {
-    fn new(m: usize) -> Lcg {
+    fn new() -> Lcg {
+        let m = 2147483647;
         Lcg {
             m,
             state: std::time::SystemTime::now()
@@ -25,21 +26,28 @@ impl Lcg {
         }
     }
 
-    fn rand_int(&mut self) -> usize {
-        let a = std::cmp::min(2 + self.m / 5, self.m - 1);
-        let c = std::cmp::min(self.m / 14, self.m - 1);
+    /// Int in range (max_val is exclusive)
+    fn rand_int_range(&mut self, max_val: usize) -> usize {
+        let a = 48271;
+        let c = 0;
 
         self.state = (a * self.state + c) % self.m;
-        self.state
+        ((self.state as f64 / self.m as f64) * max_val as f64) as usize
     }
 }
 
 /// Knuth shuffle
 pub fn shuffle<T>(vec: &mut Vec<T>) {
     let n = vec.len();
-    let mut lcg = Lcg::new(n);
+    let mut lcg = Lcg::new();
     for i in 0..n - 1 {
-        let j = i + lcg.rand_int() * (n - i) / n;
+        let j = i + lcg.rand_int_range(n) * (n - i) / n;
         vec.swap(i, j);
+    }
+}
+
+pub fn shuffle_n<T>(vec: &mut Vec<T>, n: usize) {
+    for _ in 0..n {
+        shuffle(vec);
     }
 }

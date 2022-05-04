@@ -1,7 +1,7 @@
 use crate::args::{is_trending, parse_trending_arg};
 use crate::player::Player;
 use crate::ui::{Event, HalkaraUi, UiVariant};
-use crate::utils::shuffle;
+use crate::utils::shuffle_n;
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
@@ -62,7 +62,7 @@ fn main() {
                 group.tracks.reverse();
             }
             PlayOrder::Random => {
-                shuffle(&mut (group.tracks));
+                shuffle_n(&mut (group.tracks), 2);
             }
             _ => {}
         }

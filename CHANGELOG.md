@@ -1,5 +1,9 @@
 # Changelog
 
+0.4.2
+------
+* Improved shuffling
+
 0.4.1
 ------
 * Fixed hanging application after trying to play an unavailable track
